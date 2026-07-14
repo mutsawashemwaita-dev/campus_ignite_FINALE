@@ -206,3 +206,34 @@ def pdf_department(request, pk):
             story.append(Spacer(1,6))
     _footer(story, s); doc.build(story)
     return _resp(buf, f'{dept.name.replace(" ","_")}.pdf')
+
+
+# ── Consolidated Report PDF ──────────────────────────────────
+@login_required
+def pdf_consolidated_report(request, pk):
+    from apps.cells.models import ConsolidatedCellReport
+    report = get_object_or_404(ConsolidatedCellReport, pk=pk)
+
+    buf = BytesIO()
+    doc = _doc(buf, f'Consolidated Report {report.period_start}')
+    s   = _styles()
+    story = []
+
+    _header(story, s, 'Consolidated Cell Report')
+    _meta(story, s, [
+        ('Period',    f'{report.period_start} to {report.period_end}'),
+        ('Prepared By', report.prepared_by.get_full_name()),
+        ('Submitted', report.submitted_at.strftime('%d %b %Y, %H:%M')),
+        ('Status',    'Sent to Pastors' if report.sent_to_pastors else 'Draft'),
+    ])
+
+    _sec(story, s, 'Report Content')
+    for line in report.summary.split('\n'):
+        if line.strip():
+            story.append(Paragraph(line.strip(), s['CIBody']))
+        else:
+            story.append(Spacer(1, 4))
+
+    _footer(story, s)
+    doc.build(story)
+    return _resp(buf, f'consolidated_report_{report.period_start}.pdf')

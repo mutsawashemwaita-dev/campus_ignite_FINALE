@@ -37,3 +37,10 @@ def print_department(request, pk):
     members = dept.members.select_related('user').all()
     posts   = dept.posts.select_related('posted_by').all()
     return render(request, 'print/department.html', {'dept': dept, 'members': members, 'posts': posts})
+
+
+@login_required
+def print_consolidated_report(request, pk):
+    from apps.cells.models import ConsolidatedCellReport
+    report = get_object_or_404(ConsolidatedCellReport, pk=pk)
+    return render(request, 'print/consolidated_report.html', {'report': report})

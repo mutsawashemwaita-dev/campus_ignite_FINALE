@@ -3,7 +3,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.http import JsonResponse
-from apps.accounts.decorators import role_required
 from apps.notifications.utils import create_notification
 from .models import Cell, CellMeetingReport, CellEvent, ConsolidatedCellReport, CellType, CellMember
 from .forms import CellForm, CellMeetingReportForm, CellEventForm, ConsolidatedReportForm
@@ -17,9 +16,9 @@ def cell_list(request):
 
 @login_required
 def cell_detail(request, pk):
-    cell        = get_object_or_404(Cell, pk=pk)
-    reports     = cell.reports.select_related('facilitated_by').all()
-    events      = cell.events.filter(event_date__gte=datetime.date.today()).order_by('event_date')
+    cell         = get_object_or_404(Cell, pk=pk)
+    reports      = cell.reports.select_related('facilitated_by').all()
+    events       = cell.events.filter(event_date__gte=datetime.date.today()).order_by('event_date')
     cell_members = cell.cell_members.select_related('user').all()
     return render(request, 'cells/detail.html', {
         'cell': cell, 'reports': reports, 'events': events, 'cell_members': cell_members,
@@ -43,19 +42,21 @@ def cell_create(request):
 def cell_update(request, pk):
     cell = get_object_or_404(Cell, pk=pk)
     if request.method == 'POST':
-        form = CellForm(request.POST, instance=cell)
+        form = CellForm(request.POST)
         if form.is_valid():
-            form.save()
+            form.save(instance=cell)
             messages.success(request, 'Cell updated.')
             return redirect('cell_detail', pk=pk)
     else:
-        initial = {
+        form = CellForm(initial={
+            'name':                   cell.name,
             'facilitator_username':   cell.facilitator.username,
             'second_in_cmd_username': cell.second_in_cmd.username if cell.second_in_cmd else '',
             'cell_type_name':         cell.cell_type.name if cell.cell_type else '',
             'meeting_day':            cell.meeting_day,
-        }
-        form = CellForm(instance=cell, initial=initial)
+            'venue':                  cell.venue,
+            'meeting_time':           cell.meeting_time,
+        })
     return render(request, 'cells/form.html', {'form': form, 'title': 'Edit Cell'})
 
 
@@ -152,49 +153,8 @@ def consolidated_report_create(request):
 
 # ── Cell Members ─────────────────────────────────────────────
 @login_required
-def cell_member_add(request, cell_pk):
-    from apps.accounts.models import CustomUser, MemberProfile
-    cell = get_object_or_404(Cell, pk=cell_pk)
-    if request.method == 'POST':
-        identifier      = request.POST.get('identifier', '').strip()
-        attendance_type = request.POST.get('attendance_type', 'regular')
-        user    = CustomUser.objects.filter(username=identifier).first()
-        profile = None
-        if not user:
-            parts = identifier.split(' ', 1)
-            if len(parts) == 2:
-                profile = MemberProfile.objects.filter(
-                    first_name__iexact=parts[0], last_name__iexact=parts[1]).first()
-        if not user and not profile:
-            messages.error(request, f'No person found with username or name "{identifier}". Add them via People first.')
-            return redirect('cell_member_add', cell_pk=cell_pk)
-        CellMember.objects.create(cell=cell, user=user, member_profile=profile,
-                                  attendance_type=attendance_type)
-        name = user.get_full_name() if user else profile.get_full_name()
-        messages.success(request, f'{name} added to {cell.name} as {attendance_type}.')
-        return redirect('cell_detail', pk=cell_pk)
-    all_users   = CustomUser.objects.filter(is_active=True).order_by('first_name')
-    all_members = MemberProfile.objects.order_by('first_name')
-    return render(request, 'cells/add_member.html', {
-        'cell': cell, 'all_users': all_users, 'all_members': all_members
-    })
-
-
-@login_required
-def cell_member_remove(request, cell_pk, member_pk):
-    cell   = get_object_or_404(Cell, pk=cell_pk)
-    member = get_object_or_404(CellMember, pk=member_pk, cell=cell)
-    name   = member.get_name()
-    member.delete()
-    messages.success(request, f'{name} removed from {cell.name}.')
-    return redirect('cell_detail', pk=cell_pk)
-
-
-# ── Cell Members ─────────────────────────────────────────────
-@login_required
 def cell_members(request, pk):
     cell    = get_object_or_404(Cell, pk=pk)
-    from .models import CellMember
     members = cell.cell_members.select_related('user').all()
     return render(request, 'cells/members.html', {'cell': cell, 'members': members})
 
@@ -208,17 +168,15 @@ def add_cell_member(request, pk):
         notes            = request.POST.get('notes', '').strip()
 
         from apps.accounts.models import CustomUser
-        from .models import CellMember
-        # Search by username or full name
         user = None
         try:
             user = CustomUser.objects.get(username=username_or_name)
         except CustomUser.DoesNotExist:
-            # Try by full name
             parts = username_or_name.split()
             if len(parts) >= 2:
                 qs = CustomUser.objects.filter(
-                    first_name__iexact=parts[0], last_name__iexact=' '.join(parts[1:])
+                    first_name__iexact=parts[0],
+                    last_name__iexact=' '.join(parts[1:])
                 )
                 if qs.exists():
                     user = qs.first()
@@ -243,7 +201,6 @@ def add_cell_member(request, pk):
 
 @login_required
 def remove_cell_member(request, pk, member_pk):
-    from .models import CellMember
     cell   = get_object_or_404(Cell, pk=pk)
     member = get_object_or_404(CellMember, pk=member_pk, cell=cell)
     name   = member.user.get_full_name()
@@ -254,7 +211,6 @@ def remove_cell_member(request, pk, member_pk):
 
 @login_required
 def update_member_attendance(request, pk, member_pk):
-    from .models import CellMember
     cell   = get_object_or_404(Cell, pk=pk)
     member = get_object_or_404(CellMember, pk=member_pk, cell=cell)
     attendance = request.POST.get('attendance', member.attendance)
@@ -262,3 +218,17 @@ def update_member_attendance(request, pk, member_pk):
     member.save()
     messages.success(request, f'{member.user.get_full_name()} updated to {attendance}.')
     return redirect('cell_members', pk=pk)
+
+
+@login_required
+def consolidated_report_list(request):
+    """Pastors and admins see all consolidated reports."""
+    from apps.cells.models import ConsolidatedCellReport
+    reports = ConsolidatedCellReport.objects.select_related('prepared_by').order_by('-submitted_at')
+    return render(request, 'cells/consolidated_report_list.html', {'reports': reports})
+
+
+@login_required
+def consolidated_report_detail(request, pk):
+    report = get_object_or_404(ConsolidatedCellReport, pk=pk)
+    return render(request, 'cells/consolidated_report_detail.html', {'report': report})
