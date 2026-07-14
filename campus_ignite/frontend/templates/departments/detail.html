@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}{{ dept.name }}{% endblock %}
+{% block page_title %}{{ dept.name }}{% endblock %}
+{% block content %}
+
+<!-- Top action bar -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <a href="{% url 'department_list' %}" class="text-muted small"><i class="fas fa-arrow-left me-1"></i>All Departments</a>
+  <div class="d-flex flex-wrap gap-2">
+    <a href="{% url 'dept_add_member' dept.pk %}" class="btn btn-sm btn-ci">
+      <i class="fas fa-user-plus me-1"></i>Add Member
+    </a>
+    <a href="{% url 'department_edit' dept.pk %}" class="btn btn-sm btn-outline-primary">
+      <i class="fas fa-users-cog me-1"></i>Add / Update Leaders
+    </a>
+    <a href="{% url 'dept_post_create' dept.pk %}" class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-pen me-1"></i>New Post
+    </a>
+    <a href="{% url 'print_department' dept.pk %}" class="btn btn-sm btn-outline-secondary" target="_blank">
+      <i class="fas fa-print me-1"></i>Print
+    </a>
+    <a href="{% url 'pdf_department' dept.pk %}" class="btn btn-sm btn-ci-gold" target="_blank">
+      <i class="fas fa-file-pdf me-1"></i>Save PDF
+    </a>
+  </div>
+</div>
+
+<!-- Info bar -->
+<div class="row g-3 mb-4">
+  <div class="col-auto"><div class="ci-stat py-2 px-3"><div class="lbl">Type</div><div class="fw-bold" style="color:var(--ci-primary);">{{ dept.get_dept_type_display }}</div></div></div>
+  <div class="col-auto"><div class="ci-stat py-2 px-3"><div class="lbl">Members</div><div class="num" style="font-size:1.4rem;">{{ members.count }}</div></div></div>
+  {% if dept.leader %}
+  <div class="col-auto"><div class="ci-stat py-2 px-3"><div class="lbl">Leader</div><div class="fw-bold" style="color:var(--ci-primary);">{{ dept.leader.get_full_name }}</div></div></div>
+  {% endif %}
+  {% if dept.second_in_cmd %}
+  <div class="col-auto"><div class="ci-stat py-2 px-3" style="border-left-color:var(--ci-primary);"><div class="lbl">2IC</div><div class="fw-bold" style="color:var(--ci-primary);">{{ dept.second_in_cmd.get_full_name }}</div></div></div>
+  {% endif %}
+</div>
+
+{% if dept.description %}<p class="text-muted mb-4">{{ dept.description }}</p>{% endif %}
+
+<div class="row g-4">
+  <!-- Members Panel -->
+  <div class="col-lg-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="ci-section-header mb-0"><i class="fas fa-users me-2"></i>Members ({{ members.count }})</h6>
+      <a href="{% url 'dept_add_member' dept.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-plus me-1"></i>Add</a>
+    </div>
+    <div class="ci-card card">
+      {% if members %}
+      <ul class="list-group list-group-flush">
+        {% for m in members %}
+        <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+          <div class="d-flex align-items-center gap-2">
+            <div class="avatar" style="width:32px;height:32px;font-size:.75rem;">{{ m.user.first_name|first|upper }}{{ m.user.last_name|first|upper }}</div>
+            <div>
+              <div class="fw-semibold" style="font-size:.88rem;color:var(--ci-primary);">{{ m.user.get_full_name }}</div>
+              {% if m.role_in_dept %}<small class="text-muted">{{ m.role_in_dept }}</small>{% endif %}
+            </div>
+          </div>
+          <a href="{% url 'dept_remove_member' dept.pk m.pk %}" class="btn btn-sm btn-outline-danger"
+             data-confirm="Remove {{ m.user.get_full_name }}?"><i class="fas fa-times"></i></a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="p-4 text-center text-muted small">
+        <i class="fas fa-users fa-2x mb-2 d-block" style="opacity:.3;"></i>
+        No members yet.<br>
+        <a href="{% url 'dept_add_member' dept.pk %}" class="btn btn-sm btn-ci mt-2">Add First Member</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Posts Panel -->
+  <div class="col-lg-8">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="ci-section-header mb-0"><i class="fas fa-bullhorn me-2"></i>Posts & Announcements</h6>
+      <a href="{% url 'dept_post_create' dept.pk %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-plus me-1"></i>Post</a>
+    </div>
+    {% if posts %}
+      {% for post in posts %}
+      <div class="ci-card card mb-3 p-3 {% if post.is_pinned %}border-start border-warning border-3{% endif %}">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <div>
+            {% if post.is_pinned %}<span class="badge bg-warning text-dark me-1" style="font-size:.7rem;"><i class="fas fa-thumbtack me-1"></i>Pinned</span>{% endif %}
+            <span class="fw-bold" style="color:var(--ci-primary);">{{ post.title }}</span>
+          </div>
+          <a href="{% url 'dept_post_delete' dept.pk post.pk %}" class="btn btn-sm btn-outline-danger ms-2"
+             data-confirm="Delete this post?"><i class="fas fa-trash"></i></a>
+        </div>
+        <p class="text-muted small mb-1">{{ post.content }}</p>
+        <small class="text-muted"><i class="fas fa-user me-1"></i>{{ post.posted_by.get_full_name }} &bull; {{ post.created_at|date:"d M Y" }}</small>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center py-4 text-muted">
+        <i class="fas fa-bullhorn fa-2x mb-2 d-block" style="opacity:.3;"></i>
+        No posts yet.<br>
+        <a href="{% url 'dept_post_create' dept.pk %}" class="btn btn-sm btn-ci mt-2">Create First Post</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

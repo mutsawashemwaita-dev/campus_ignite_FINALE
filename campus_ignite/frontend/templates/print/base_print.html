@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block print_title %}Campus Ignite{% endblock %} – Campus Ignite</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: Arial, sans-serif; font-size: 12px; color: #222; background:#fff; }
+    .print-header { background: #1A3C6E; color: #fff; padding: 18px 24px; display:flex; justify-content:space-between; align-items:center; }
+    .print-header h1 { font-size: 18px; font-weight:700; }
+    .print-header .sub { font-size:11px; opacity:.7; margin-top:2px; }
+    .print-header .logo { font-size:24px; color:#C8A951; }
+    .print-body { padding: 20px 24px; }
+    .print-meta { background:#E8F0FB; border-left:4px solid #C8A951; padding:10px 14px; margin-bottom:18px; border-radius:4px; }
+    .print-meta span { margin-right:20px; font-size:11px; }
+    .print-meta strong { color:#1A3C6E; }
+    h2 { font-size:14px; color:#1A3C6E; border-bottom:2px solid #C8A951; padding-bottom:4px; margin:16px 0 10px; }
+    h3 { font-size:12px; color:#1A3C6E; margin:12px 0 6px; }
+    table { width:100%; border-collapse:collapse; margin-bottom:14px; }
+    table th { background:#1A3C6E; color:#fff; padding:7px 10px; font-size:11px; text-align:left; }
+    table td { padding:6px 10px; border-bottom:1px solid #e0e7ef; font-size:11px; }
+    table tr:nth-child(even) td { background:#f4f6fb; }
+    .report-card { border:1px solid #dee2e6; border-radius:6px; padding:12px; margin-bottom:12px; page-break-inside:avoid; }
+    .report-card .rc-header { display:flex; justify-content:space-between; margin-bottom:8px; }
+    .report-card .rc-title { font-weight:700; color:#1A3C6E; font-size:12px; }
+    .rc-badge { background:#1A3C6E; color:#fff; padding:2px 8px; border-radius:12px; font-size:10px; }
+    .section-label { font-weight:700; color:#1A3C6E; margin-top:8px; margin-bottom:2px; font-size:11px; }
+    .went-right { border-left:3px solid #198754; padding-left:8px; margin:4px 0; }
+    .went-wrong { border-left:3px solid #dc3545; padding-left:8px; margin:4px 0; }
+    .highlight   { border-left:3px solid #C8A951; padding-left:8px; margin:4px 0; }
+    .notif-item { border-bottom:1px solid #e0e7ef; padding:8px 0; }
+    .notif-item.unread { background:#E8F0FB; padding:8px; border-radius:4px; margin-bottom:4px; }
+    .flow-list { list-style:none; counter-reset:flow; }
+    .flow-list li { counter-increment:flow; padding:4px 0; border-bottom:1px dashed #dee2e6; }
+    .flow-list li::before { content:counter(flow)". "; font-weight:700; color:#1A3C6E; }
+    .member-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .member-item { border:1px solid #dee2e6; border-radius:4px; padding:8px; font-size:11px; }
+    .member-name { font-weight:700; color:#1A3C6E; }
+    .post-card { border:1px solid #dee2e6; border-radius:6px; padding:10px; margin-bottom:10px; page-break-inside:avoid; }
+    .pinned { border-left:3px solid #C8A951; }
+    .print-footer { margin-top:24px; border-top:1px solid #dee2e6; padding-top:10px; text-align:center; font-size:10px; color:#999; }
+    .print-btn { position:fixed; bottom:20px; right:20px; background:#1A3C6E; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,.2); z-index:999; }
+    .print-btn i { margin-right:6px; }
+    @media print {
+      .print-btn { display:none !important; }
+      body { font-size:11px; }
+      .print-header { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      table th { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    }
+  </style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">
+  <i>🖨️</i> Print / Save PDF
+</button>
+
+<div class="print-header">
+  <div>
+    <h1>{% block print_title %}Report{% endblock %}</h1>
+    <div class="sub">Campus Ignite – Campus Christian Institution</div>
+  </div>
+  <div style="text-align:right;">
+    <div style="font-size:28px;">🔥</div>
+    <div style="font-size:10px;opacity:.7;">Printed: {% now "d M Y, H:i" %}</div>
+  </div>
+</div>
+
+<div class="print-body">
+  {% block print_content %}{% endblock %}
+</div>
+
+<div class="print-footer">
+  Campus Ignite – Campus Christian Institution &bull; Printed on {% now "d M Y" %}
+</div>
+</body>
+</html>

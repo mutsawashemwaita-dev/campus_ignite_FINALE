@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Departments{% endblock %}
+{% block page_title %}Departments{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <p class="text-muted mb-0">All ministry departments — Choir, Hospitality, Marketing and more.</p>
+  <a href="{% url 'department_create' %}" class="btn btn-ci">
+    <i class="fas fa-plus me-2"></i>New Department
+  </a>
+</div>
+
+{% if not departments %}
+<div class="text-center py-5">
+  <i class="fas fa-layer-group fa-3x mb-3 d-block" style="opacity:.2;color:var(--ci-primary);"></i>
+  <h5 class="text-muted mb-3">No departments yet</h5>
+  <a href="{% url 'department_create' %}" class="btn btn-ci px-4">
+    <i class="fas fa-plus me-2"></i>Create First Department
+  </a>
+</div>
+{% else %}
+{% for type_name, depts in grouped.items %}
+<h6 class="ci-section-header mt-4">
+  <i class="fas {% if 'Choir' in type_name %}fa-music{% elif 'Hospitality' in type_name %}fa-handshake{% elif 'Marketing' in type_name %}fa-bullhorn{% elif 'Evangelism' in type_name %}fa-bible{% elif 'Prayer' in type_name %}fa-praying-hands{% elif 'Media' in type_name %}fa-camera{% elif 'Welfare' in type_name %}fa-heart{% elif 'Youth' in type_name %}fa-star{% else %}fa-layer-group{% endif %} me-2"></i>{{ type_name }}
+</h6>
+<div class="row g-3 mb-2">
+  {% for dept in depts %}
+  <div class="col-md-6 col-lg-4">
+    <div class="ci-card card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h6 class="fw-bold mb-0" style="color:var(--ci-primary);">{{ dept.name }}</h6>
+          <span class="badge-role">{{ dept.members.count }} members</span>
+        </div>
+        {% if dept.description %}<p class="text-muted small mb-2">{{ dept.description|truncatewords:15 }}</p>{% endif %}
+        <div class="small text-muted mb-3">
+          {% if dept.leader %}<div><i class="fas fa-star me-1" style="color:var(--ci-accent);"></i>{{ dept.leader.get_full_name }} <span class="text-muted">(Leader)</span></div>{% endif %}
+          {% if dept.second_in_cmd %}<div><i class="fas fa-user-shield me-1"></i>{{ dept.second_in_cmd.get_full_name }} <span class="text-muted">(2IC)</span></div>{% endif %}
+        </div>
+        <a href="{% url 'department_detail' dept.pk %}" class="btn btn-sm btn-ci w-100">
+          <i class="fas fa-eye me-1"></i>View Department
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}

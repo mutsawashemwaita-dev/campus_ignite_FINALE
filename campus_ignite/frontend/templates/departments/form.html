@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="mb-3"><a href="{% url 'department_list' %}" class="text-muted small"><i class="fas fa-arrow-left me-1"></i>Back</a></div>
+    <div class="ci-form-card">
+      <div class="p-3 rounded mb-4" style="background:var(--ci-light);border-left:4px solid var(--ci-accent);">
+        <p class="mb-1 fw-bold small" style="color:var(--ci-primary);"><i class="fas fa-info-circle me-1"></i>Department Types</p>
+        <div class="row g-1" style="font-size:.8rem;color:var(--ci-muted);">
+          <div class="col-6"><code>choir</code> <code>hospitality</code></div>
+          <div class="col-6"><code>marketing</code> <code>evangelism</code></div>
+          <div class="col-6"><code>prayer</code> <code>ushering</code></div>
+          <div class="col-6"><code>media</code> <code>welfare</code></div>
+          <div class="col-6"><code>youth</code> <code>other</code></div>
+        </div>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-layer-group me-1"></i>Department Details</h6>
+          <div class="mb-3">
+            <label class="form-label">Department Name <span class="text-danger">*</span></label>
+            <input type="text" name="name" class="form-control" value="{{ form.name.value|default:'' }}" placeholder="e.g. Zion Choir, Hospitality Team">
+            {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Department Type <span class="text-danger">*</span></label>
+            <input type="text" name="dept_type" class="form-control" value="{{ form.dept_type.value|default:'' }}" placeholder="choir / hospitality / marketing / evangelism / prayer / ushering / media / welfare / youth / other">
+            {% if form.dept_type.errors %}<div class="text-danger small">{{ form.dept_type.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="3" placeholder="Brief description...">{{ form.description.value|default:'' }}</textarea>
+          </div>
+        </div>
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-users me-1"></i>Leadership</h6>
+          <div class="mb-3">
+            <label class="form-label">Leader Username</label>
+            <input type="text" name="leader_username" class="form-control" value="{{ form.leader_username.value|default:'' }}" placeholder="Type the leader's username">
+            {% if form.leader_username.errors %}<div class="text-danger small">{{ form.leader_username.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">2IC Username <span class="text-muted">(optional)</span></label>
+            <input type="text" name="second_in_cmd_username" class="form-control" value="{{ form.second_in_cmd_username.value|default:'' }}" placeholder="Type the 2IC's username">
+            {% if form.second_in_cmd_username.errors %}<div class="text-danger small">{{ form.second_in_cmd_username.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+        {% if form.non_field_errors %}<div class="alert alert-danger small">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>{% endif %}
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci px-4"><i class="fas fa-save me-2"></i>Save</button>
+          <a href="{% url 'department_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

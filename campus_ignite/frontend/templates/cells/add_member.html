@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Add Cell Member{% endblock %}
+{% block page_title %}Add Member to {{ cell.name }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="mb-3">
+      <a href="{% url 'cell_detail' cell.pk %}" class="text-muted small"><i class="fas fa-arrow-left me-1"></i>Back to {{ cell.name }}</a>
+    </div>
+    <div class="ci-form-card">
+      <div class="alert alert-info small mb-4">
+        <i class="fas fa-info-circle me-1"></i>
+        Type the <strong>username</strong> of system users, or the <strong>full name</strong> (First Last) of members without login.
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label">Person <span class="text-danger">*</span></label>
+          <input type="text" name="identifier" class="form-control"
+                 placeholder="Username (e.g. john_doe) or Full Name (e.g. John Doe)" list="peopleList">
+          <datalist id="peopleList">
+            {% for u in all_users %}<option value="{{ u.username }}">{{ u.get_full_name }} ({{ u.username }})</option>{% endfor %}
+            {% for m in all_members %}<option value="{{ m.first_name }} {{ m.last_name }}">{{ m.get_full_name }}</option>{% endfor %}
+          </datalist>
+          <small class="text-muted">Start typing to see suggestions</small>
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Attendance Type <span class="text-danger">*</span></label>
+          <div class="d-flex gap-3 mt-1">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="attendance_type" value="consistent" id="att_consistent">
+              <label class="form-check-label" for="att_consistent">
+                <i class="fas fa-star me-1" style="color:var(--ci-accent);"></i><strong>Consistent</strong>
+                <small class="d-block text-muted">Comes every week</small>
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="attendance_type" value="regular" id="att_regular" checked>
+              <label class="form-check-label" for="att_regular">
+                <i class="fas fa-check-circle me-1" style="color:#198754;"></i><strong>Regular</strong>
+                <small class="d-block text-muted">Comes most weeks</small>
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="attendance_type" value="visitor" id="att_visitor">
+              <label class="form-check-label" for="att_visitor">
+                <i class="fas fa-user-clock me-1" style="color:var(--ci-primary);"></i><strong>Visitor</strong>
+                <small class="d-block text-muted">Occasional / new</small>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci px-4"><i class="fas fa-user-plus me-2"></i>Add to Cell</button>
+          <a href="{% url 'cell_detail' cell.pk %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

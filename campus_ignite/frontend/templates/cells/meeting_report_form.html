@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Meeting Report – {{ cell.name }}{% endblock %}
+{% block page_title %}Cell Meeting Report{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="mb-3">
+      <span class="badge-role me-2">{{ cell.name }}</span>
+      <a href="{% url 'cell_detail' cell.pk %}" class="text-muted small"><i class="fas fa-arrow-left me-1"></i>Back to cell</a>
+    </div>
+    <div class="ci-form-card">
+      <form method="post">
+        {% csrf_token %}
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-clock me-1"></i>Session Details</h6>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Date <span class="text-danger">*</span></label>
+              <input type="date" name="date" class="form-control" value="{{ form.date.value|default:'' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Time Started <span class="text-danger">*</span></label>
+              <input type="time" name="time_started" class="form-control" value="{{ form.time_started.value|default:'' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Time Ended <span class="text-danger">*</span></label>
+              <input type="time" name="time_ended" class="form-control" value="{{ form.time_ended.value|default:'' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Head Count <span class="text-danger">*</span></label>
+              <input type="number" name="head_count" class="form-control" value="{{ form.head_count.value|default:'' }}" placeholder="Number of people present">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Facilitated By (Username) <span class="text-danger">*</span></label>
+              <input type="text" name="facilitated_by_username" class="form-control"
+                     value="{{ form.facilitated_by_username.value|default:request.user.username }}"
+                     placeholder="Type the username">
+            </div>
+          </div>
+        </div>
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-file-alt me-1"></i>Report Content</h6>
+          <div class="mb-3">
+            <label class="form-label">Summary <span class="text-danger">*</span></label>
+            <textarea name="summary" class="form-control" rows="4" placeholder="Brief summary of the cell meeting...">{{ form.summary.value|default:'' }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-success"><i class="fas fa-thumbs-up me-1"></i>What Went Right</label>
+            <textarea name="went_right" class="form-control" rows="3" placeholder="What went well during the cell?">{{ form.went_right.value|default:'' }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-danger"><i class="fas fa-thumbs-down me-1"></i>What Went Wrong</label>
+            <textarea name="went_wrong" class="form-control" rows="3" placeholder="What challenges did you face?">{{ form.went_wrong.value|default:'' }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="color:var(--ci-accent);"><i class="fas fa-star me-1"></i>Highlights</label>
+            <textarea name="highlights" class="form-control" rows="3" placeholder="Key highlights and testimonies...">{{ form.highlights.value|default:'' }}</textarea>
+          </div>
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-danger small">
+          {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
+        </div>
+        {% endif %}
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci px-4"><i class="fas fa-paper-plane me-2"></i>Submit Report</button>
+          <a href="{% url 'cell_detail' cell.pk %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="ci-form-card">
+      <div class="text-center mb-4">
+        <div id="avatar-wrap" class="avatar mx-auto mb-2" style="width:80px;height:80px;font-size:1.8rem;">
+          {% if user.photo %}
+            <img id="photo-preview" src="{{ user.photo.url }}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
+          {% else %}
+            <img id="photo-preview" src="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;display:none;">
+            <span id="initials">{{ user.first_name|first }}{{ user.last_name|first }}</span>
+          {% endif %}
+        </div>
+        <div class="text-muted small">{{ user.username }} &bull; <span class="badge-role">{{ user.role }}</span></div>
+      </div>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<div class="text-danger small">{{ field.errors.0 }}</div>{% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-ci w-100 mt-2"><i class="fas fa-save me-2"></i>Update Profile</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

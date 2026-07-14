@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Consolidated Report{% endblock %}
+{% block page_title %}Consolidated Report{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <a href="{% url 'consolidated_report_list' %}" class="text-muted small">
+    <i class="fas fa-arrow-left me-1"></i>All Reports
+  </a>
+  <div class="d-flex gap-2">
+    <a href="{% url 'print_consolidated_report' report.pk %}" class="btn btn-sm btn-outline-secondary" target="_blank">
+      <i class="fas fa-print me-1"></i>Print
+    </a>
+    <a href="{% url 'pdf_consolidated_report' report.pk %}" class="btn btn-sm btn-ci-gold" target="_blank">
+      <i class="fas fa-file-pdf me-1"></i>Save PDF
+    </a>
+  </div>
+</div>
+
+<!-- Meta info -->
+<div class="row g-3 mb-4">
+  <div class="col-auto">
+    <div class="ci-stat py-2 px-3">
+      <div class="lbl">Period</div>
+      <div class="fw-bold" style="color:var(--ci-primary);">{{ report.period_start }} → {{ report.period_end }}</div>
+    </div>
+  </div>
+  <div class="col-auto">
+    <div class="ci-stat py-2 px-3">
+      <div class="lbl">Prepared By</div>
+      <div class="fw-bold" style="color:var(--ci-primary);">{{ report.prepared_by.get_full_name }}</div>
+    </div>
+  </div>
+  <div class="col-auto">
+    <div class="ci-stat py-2 px-3">
+      <div class="lbl">Submitted</div>
+      <div class="fw-bold" style="color:var(--ci-primary);">{{ report.submitted_at|date:"d M Y, H:i" }}</div>
+    </div>
+  </div>
+  <div class="col-auto">
+    <div class="ci-stat py-2 px-3" style="border-left-color:{% if report.sent_to_pastors %}#198754{% else %}#ffc107{% endif %};">
+      <div class="lbl">Status</div>
+      <div class="fw-bold" style="color:{% if report.sent_to_pastors %}#198754{% else %}#ffc107{% endif %};">
+        {% if report.sent_to_pastors %}✅ Sent to Pastors{% else %}⏳ Draft{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Report Content -->
+<div class="ci-card card p-4">
+  <h6 class="ci-section-header"><i class="fas fa-file-alt me-2"></i>Report Content</h6>
+  <div style="white-space:pre-line;line-height:1.8;font-size:.95rem;">{{ report.summary }}</div>
+</div>
+{% endblock %}

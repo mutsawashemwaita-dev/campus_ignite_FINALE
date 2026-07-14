@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="ci-form-card">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-user me-1"></i>Pastor Details</h6>
+          <div class="mb-3">
+            <label class="form-label">Username of User to Assign <span class="text-danger">*</span></label>
+            <input type="text" name="user_username" class="form-control" placeholder="Type the username of an existing system user">
+            <small class="text-muted">The user must already exist in the system.</small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Title <span class="text-danger">*</span></label>
+            <input type="text" name="title" class="form-control" placeholder="e.g. Senior Pastor, Associate Pastor, Campus Pastor">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Date Appointed <span class="text-danger">*</span></label>
+            <input type="date" name="date_appointed" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Biography</label>
+            <textarea name="bio" class="form-control" rows="3" placeholder="Short biography of the pastor..."></textarea>
+          </div>
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-danger small">
+          {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
+          {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+        </div>
+        {% endif %}
+        <div class="d-flex gap-2 mt-3">
+          <button type="submit" class="btn btn-ci px-4"><i class="fas fa-save me-2"></i>Save</button>
+          <a href="{% url 'pastor_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

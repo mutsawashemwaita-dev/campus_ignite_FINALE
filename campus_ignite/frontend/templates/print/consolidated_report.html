@@ -1,0 +1,12 @@
+{% extends 'print/base_print.html' %}
+{% block print_title %}Consolidated Cell Report{% endblock %}
+{% block print_content %}
+<div class="print-meta">
+  <span><strong>Period:</strong> {{ report.period_start }} to {{ report.period_end }}</span>
+  <span><strong>Prepared By:</strong> {{ report.prepared_by.get_full_name }}</span>
+  <span><strong>Submitted:</strong> {{ report.submitted_at|date:"d M Y, H:i" }}</span>
+  <span><strong>Status:</strong> {% if report.sent_to_pastors %}Sent to Pastors{% else %}Draft{% endif %}</span>
+</div>
+<h2>Report Content</h2>
+<div style="white-space:pre-line;line-height:1.8;">{{ report.summary }}</div>
+{% endblock %}

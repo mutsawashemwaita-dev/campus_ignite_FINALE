@@ -1,0 +1,89 @@
+:root {
+  --ci-primary:   #1A3C6E;
+  --ci-accent:    #C8A951;
+  --ci-light:     #E8F0FB;
+  --ci-text:      #222222;
+  --ci-muted:     #6c757d;
+  --ci-border:    #dee2e6;
+  --ci-sidebar-w: 240px;
+}
+body { font-family: 'Inter','Segoe UI',Arial,sans-serif; background:#f4f6fb; color:var(--ci-text); }
+/* Sidebar */
+.ci-sidebar { width:var(--ci-sidebar-w); min-height:100vh; background:var(--ci-primary); position:fixed; top:0;left:0;z-index:200; box-shadow:4px 0 12px rgba(0,0,0,.08); display:flex;flex-direction:column; }
+.ci-sidebar .brand { padding:1.4rem 1.2rem 1.2rem; border-bottom:1px solid rgba(255,255,255,.1); }
+.ci-sidebar .brand h5 { color:var(--ci-accent);font-weight:700;margin:0;font-size:1.05rem; }
+.ci-sidebar .brand small { color:rgba(255,255,255,.45);font-size:.7rem; }
+.ci-sidebar .nav-link { color:rgba(255,255,255,.72);padding:.58rem 1.25rem;display:flex;align-items:center;gap:.65rem;border-left:3px solid transparent;font-size:.87rem;transition:all .15s; }
+.ci-sidebar .nav-link:hover,.ci-sidebar .nav-link.active { color:#fff;background:rgba(255,255,255,.09);border-left-color:var(--ci-accent); }
+.ci-sidebar .nav-link i { width:16px;text-align:center;font-size:.84rem; }
+.ci-sidebar .nav-divider { border-color:rgba(255,255,255,.12);margin:.4rem 1.2rem; }
+.ci-sidebar .nav-section { color:rgba(255,255,255,.35);font-size:.64rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.8rem 1.25rem .25rem; }
+/* Main */
+.ci-main { margin-left:var(--ci-sidebar-w); min-height:100vh; }
+.ci-topbar { background:#fff;border-bottom:1px solid var(--ci-border);padding:.75rem 1.75rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100; }
+.ci-topbar h5 { color:var(--ci-primary);font-weight:700;margin:0;font-size:1rem; }
+.ci-page { padding:1.75rem; }
+/* Stat Cards */
+.ci-stat { background:#fff;border-radius:10px;padding:1.2rem 1.4rem;box-shadow:0 2px 8px rgba(26,60,110,.07);border-left:4px solid var(--ci-accent);height:100%; }
+.ci-stat .num { font-size:2rem;font-weight:700;color:var(--ci-primary);line-height:1; }
+.ci-stat .lbl { font-size:.78rem;color:var(--ci-muted);margin-bottom:.2rem; }
+/* Cards */
+.ci-card { background:#fff;border-radius:10px;border:none;box-shadow:0 2px 8px rgba(26,60,110,.06); }
+.ci-card .card-header { background:#fff;border-bottom:2px solid var(--ci-light);font-weight:600;color:var(--ci-primary);padding:.9rem 1.2rem;border-radius:10px 10px 0 0 !important; }
+.ci-section-header { color:var(--ci-primary);font-weight:700;font-size:1rem;border-bottom:2px solid var(--ci-accent);padding-bottom:.4rem;margin-bottom:1.1rem; }
+/* Tables */
+.ci-table thead tr { background:var(--ci-primary);color:#fff; }
+.ci-table thead th { font-weight:600;font-size:.82rem;letter-spacing:.03em;border:none;padding:.75rem 1rem; }
+.ci-table tbody tr:hover { background:var(--ci-light); }
+.ci-table td { vertical-align:middle;font-size:.88rem;padding:.7rem 1rem; }
+/* Buttons */
+.btn-ci { background:var(--ci-primary);border-color:var(--ci-primary);color:#fff; }
+.btn-ci:hover { background:#122d57;color:#fff; }
+.btn-ci-gold { background:var(--ci-accent);border-color:var(--ci-accent);color:#fff; }
+.btn-ci-gold:hover { background:#b8952f;color:#fff; }
+/* Badges */
+.badge-role { background:var(--ci-light);color:var(--ci-primary);font-weight:600;font-size:.74rem;padding:.35em .7em;border-radius:20px; }
+.badge-hc { background:var(--ci-primary);color:#fff;font-size:.74rem;padding:.3em .65em;border-radius:20px; }
+/* Forms */
+.ci-form-card { background:#fff;border-radius:12px;padding:2rem;box-shadow:0 2px 12px rgba(26,60,110,.08); }
+.ci-form-card .form-label { font-weight:600;font-size:.85rem;color:var(--ci-primary);margin-bottom:.3rem; }
+.ci-form-section { border-left:3px solid var(--ci-accent);padding-left:1rem;margin-bottom:1.5rem; }
+.ci-form-section h6 { color:var(--ci-primary);font-weight:700; }
+/* Leader Cards */
+.leader-card { background:#fff;border-radius:10px;padding:1.2rem;box-shadow:0 2px 8px rgba(26,60,110,.07);border-top:3px solid var(--ci-accent);height:100%; }
+.leader-card .pos-title { font-size:.7rem;text-transform:uppercase;font-weight:700;letter-spacing:.08em;color:var(--ci-accent); }
+.leader-card .lead-name { font-weight:700;color:var(--ci-primary);font-size:.95rem; }
+.leader-card .lead-2ic  { font-size:.82rem;color:var(--ci-muted); }
+.avatar { width:42px;height:42px;border-radius:50%;background:var(--ci-light);color:var(--ci-primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;flex-shrink:0; }
+/* Notifications */
+.notif-item { border-left:3px solid transparent;transition:background .15s; }
+.notif-item.unread { border-left-color:var(--ci-accent);background:var(--ci-light); }
+/* Flow steps */
+.flow-step { display:flex;align-items:center;gap:.75rem;padding:.5rem 0;border-bottom:1px dashed var(--ci-border); }
+.flow-step:last-child { border-bottom:none; }
+.flow-num { background:var(--ci-primary);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0; }
+/* Calendar */
+.fc-toolbar-title { font-size:1rem !important;color:var(--ci-primary) !important;font-weight:700 !important; }
+.fc-button-primary { background:var(--ci-primary) !important;border-color:var(--ci-primary) !important; }
+.fc-event { background:var(--ci-primary) !important;border-color:var(--ci-accent) !important; }
+/* Login */
+.ci-login-bg { background:linear-gradient(135deg,#1A3C6E 55%,#C8A951 100%);min-height:100vh; }
+.ci-login-card { border-radius:16px;overflow:hidden;width:400px; }
+/* Responsive */
+@media(max-width:768px){.ci-sidebar{transform:translateX(-100%);transition:transform .3s;}.ci-sidebar.open{transform:translateX(0);}.ci-main{margin-left:0;}}
+
+/* Animated flame logo */
+.flame-icon {
+  display: inline-block;
+  animation: flicker 1.5s ease-in-out infinite alternate;
+  transform-origin: bottom center;
+  filter: drop-shadow(0 0 6px #C8A951);
+}
+
+@keyframes flicker {
+  0%   { transform: scale(1) rotate(-2deg);   opacity: 1;    filter: drop-shadow(0 0 4px #C8A951); }
+  25%  { transform: scale(1.05) rotate(1deg); opacity: 0.95; filter: drop-shadow(0 0 8px #ff6b00); }
+  50%  { transform: scale(0.98) rotate(-1deg);opacity: 1;    filter: drop-shadow(0 0 6px #C8A951); }
+  75%  { transform: scale(1.03) rotate(2deg); opacity: 0.9;  filter: drop-shadow(0 0 10px #ff4500);}
+  100% { transform: scale(1) rotate(-1deg);   opacity: 1;    filter: drop-shadow(0 0 5px #C8A951); }
+}

@@ -1,0 +1,43 @@
+{% extends 'print/base_print.html' %}
+{% block print_title %}{{ dept.name }}{% endblock %}
+{% block print_content %}
+<div class="print-meta">
+  <span><strong>Department:</strong> {{ dept.name }}</span>
+  <span><strong>Type:</strong> {{ dept.get_dept_type_display }}</span>
+  <span><strong>Members:</strong> {{ members.count }}</span>
+  {% if dept.leader %}<span><strong>Leader:</strong> {{ dept.leader.get_full_name }}</span>{% endif %}
+  {% if dept.second_in_cmd %}<span><strong>2IC:</strong> {{ dept.second_in_cmd.get_full_name }}</span>{% endif %}
+</div>
+{% if dept.description %}<p style="margin-bottom:12px;">{{ dept.description }}</p>{% endif %}
+
+<h2>Members</h2>
+<table>
+  <thead><tr><th>#</th><th>Name</th><th>Username</th><th>Role in Department</th><th>Date Joined</th></tr></thead>
+  <tbody>
+    {% for m in members %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ m.user.get_full_name }}</td>
+      <td>{{ m.user.username }}</td>
+      <td>{{ m.role_in_dept|default:"Member" }}</td>
+      <td>{{ m.date_joined }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No members yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if posts %}
+<h2>Posts & Announcements</h2>
+{% for p in posts %}
+<div class="post-card {% if p.is_pinned %}pinned{% endif %}">
+  <div style="display:flex;justify-content:space-between;">
+    <strong style="color:#1A3C6E;">{% if p.is_pinned %}📌 {% endif %}{{ p.title }}</strong>
+    <small style="color:#999;">{{ p.created_at|date:"d M Y" }} by {{ p.posted_by.get_full_name }}</small>
+  </div>
+  <p style="margin-top:6px;">{{ p.content }}</p>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}

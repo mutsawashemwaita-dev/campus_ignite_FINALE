@@ -1,0 +1,39 @@
+{% extends 'print/base_print.html' %}
+{% block print_title %}All Service Records{% endblock %}
+{% block print_content %}
+<div class="print-meta">
+  <span><strong>Total Services:</strong> {{ services.count }}</span>
+</div>
+<h2>Service Records</h2>
+<table>
+  <thead>
+    <tr><th>Date</th><th>Preacher</th><th>Message Title</th><th>Headcount</th></tr>
+  </thead>
+  <tbody>
+    {% for s in services %}
+    <tr>
+      <td>{{ s.date }}</td>
+      <td>{{ s.guest_preacher|default:s.preacher.get_full_name|default:"—" }}</td>
+      <td>{{ s.message_title }}</td>
+      <td>{{ s.head_count }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">No services recorded.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% for s in services %}
+<div class="report-card" style="margin-top:10px;">
+  <div class="rc-header">
+    <div class="rc-title">{{ s.date }} – {{ s.message_title }}</div>
+    <span class="rc-badge">HC: {{ s.head_count }}</span>
+  </div>
+  <div style="font-size:11px;margin-bottom:6px;"><strong>Preacher:</strong> {{ s.guest_preacher|default:s.preacher.get_full_name|default:"—" }}</div>
+  <div class="section-label">Summary</div>
+  <p>{{ s.message_summary }}</p>
+  <div class="section-label">Flow of Service</div>
+  <ol class="flow-list">{% for step in s.get_flow_list %}<li>{{ step }}</li>{% endfor %}</ol>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Add Event – {{ cell.name }}{% endblock %}
+{% block page_title %}Add Calendar Event{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-5">
+    <div class="mb-3">
+      <span class="badge-role me-2">{{ cell.name }}</span>
+      <a href="{% url 'cell_detail' cell.pk %}" class="text-muted small"><i class="fas fa-arrow-left me-1"></i>Back</a>
+    </div>
+    <div class="ci-form-card">
+      <p class="text-muted small mb-4"><i class="fas fa-info-circle me-1"></i>All leaders will be notified when this event is saved.</p>
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<div class="text-danger small">{{ field.errors.0 }}</div>{% endif %}
+        </div>
+        {% endfor %}
+        <div class="d-flex gap-2 mt-3">
+          <button type="submit" class="btn btn-ci px-4"><i class="fas fa-calendar-check me-2"></i>Save Event</button>
+          <a href="{% url 'cell_detail' cell.pk %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Members – {{ cell.name }}{% endblock %}
+{% block page_title %}{{ cell.name }} – Members{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <a href="{% url 'cell_detail' cell.pk %}" class="text-muted small"><i class="fas fa-arrow-left me-1"></i>Back to {{ cell.name }}</a>
+  <div class="d-flex gap-2">
+    <span class="badge-hc">{{ members.count }} members</span>
+  </div>
+</div>
+
+<!-- Add Member Form -->
+<div class="ci-card card mb-4 p-4">
+  <h6 class="ci-section-header"><i class="fas fa-user-plus me-2"></i>Add Member to {{ cell.name }}</h6>
+  <form method="post" action="{% url 'add_cell_member' cell.pk %}">
+    {% csrf_token %}
+    <div class="row g-3 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label">Username or Full Name <span class="text-danger">*</span></label>
+        <input type="text" name="member_search" class="form-control"
+               placeholder="Type username or full name e.g. John Doe">
+        <small class="text-muted">Must already be in the system (add via Manage People)</small>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Attendance Type</label>
+        <div class="d-flex flex-column gap-1">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="attendance" value="consistent" id="att_consistent">
+            <label class="form-check-label" for="att_consistent">
+              <span class="badge" style="background:#198754;color:#fff;">Consistent</span>
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="attendance" value="regular" id="att_regular" checked>
+            <label class="form-check-label" for="att_regular">
+              <span class="badge" style="background:var(--ci-primary);color:#fff;">Regular</span>
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="attendance" value="visitor" id="att_visitor">
+            <label class="form-check-label" for="att_visitor">
+              <span class="badge" style="background:#6c757d;color:#fff;">Visitor</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Notes (optional)</label>
+        <input type="text" name="notes" class="form-control" placeholder="Any notes...">
+      </div>
+      <div class="col-md-1">
+        <button type="submit" class="btn btn-ci w-100"><i class="fas fa-plus"></i></button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Members List -->
+{% if members %}
+<div class="ci-card card">
+  <div class="table-responsive">
+    <table class="table ci-table mb-0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Birthday</th>
+          <th>Attendance</th>
+          <th>Notes</th>
+          <th>Since</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in members %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="avatar" style="width:30px;height:30px;font-size:.75rem;flex-shrink:0;">
+                {{ m.user.first_name|first|upper }}{{ m.user.last_name|first|upper }}
+              </div>
+              <span class="fw-semibold" style="color:var(--ci-primary);">{{ m.user.get_full_name }}</span>
+            </div>
+          </td>
+          <td>{{ m.user.phone|default:"—" }}</td>
+          <td>
+            {% if m.user.birthday %}
+              <span style="color:var(--ci-accent);"><i class="fas fa-birthday-cake me-1"></i>{{ m.user.birthday|date:"d M" }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            <form method="post" action="{% url 'update_member_attendance' cell.pk m.pk %}" class="d-inline">
+              {% csrf_token %}
+              <select name="attendance" onchange="this.form.submit()"
+                      class="form-select form-select-sm" style="width:auto;">
+                <option value="consistent" {% if m.attendance == 'consistent' %}selected{% endif %}>✅ Consistent</option>
+                <option value="regular"    {% if m.attendance == 'regular'    %}selected{% endif %}>🔵 Regular</option>
+                <option value="visitor"    {% if m.attendance == 'visitor'    %}selected{% endif %}>⚪ Visitor</option>
+              </select>
+            </form>
+          </td>
+          <td>{{ m.notes|default:"—" }}</td>
+          <td><small class="text-muted">{{ m.date_joined }}</small></td>
+          <td>
+            <a href="{% url 'remove_cell_member' cell.pk m.pk %}"
+               class="btn btn-sm btn-outline-danger"
+               data-confirm="Remove {{ m.user.get_full_name }} from this cell?">
+              <i class="fas fa-times"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+  <i class="fas fa-users fa-3x mb-3 d-block" style="opacity:.3;"></i>
+  No members yet. Add the first one above.
+</div>
+{% endif %}
+
+<!-- Summary counts -->
+{% if members %}
+<div class="row g-3 mt-2">
+  <div class="col-auto">
+    <div class="ci-stat py-2 px-3">
+      <div class="lbl">Consistent</div>
+      <div class="fw-bold" style="color:#198754;">{{ members|length }}</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

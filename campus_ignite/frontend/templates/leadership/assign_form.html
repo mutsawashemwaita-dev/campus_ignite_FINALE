@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Assign {{ position }}{% endblock %}
+{% block page_title %}Assign: {{ position }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-5">
+    <div class="ci-form-card">
+      <h6 class="ci-section-header mb-4">{{ position }}</h6>
+      <form method="post">
+        {% csrf_token %}
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-star me-1"></i>Leader</h6>
+          <div class="mb-3">
+            <label class="form-label">Leader Username <span class="text-danger">*</span></label>
+            <input type="text" name="leader_username" class="form-control"
+                   value="{{ form.leader_username.value|default:'' }}"
+                   placeholder="Type the username of the leader">
+            {% if form.leader_username.errors %}<div class="text-danger small mt-1">{{ form.leader_username.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-user-shield me-1"></i>Second in Command (2IC)</h6>
+          <div class="mb-3">
+            <label class="form-label">2IC Username <span class="text-muted">(optional)</span></label>
+            <input type="text" name="second_in_cmd_username" class="form-control"
+                   value="{{ form.second_in_cmd_username.value|default:'' }}"
+                   placeholder="Type the username of the 2IC">
+            {% if form.second_in_cmd_username.errors %}<div class="text-danger small mt-1">{{ form.second_in_cmd_username.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Year</label>
+          <input type="number" name="year" class="form-control"
+                 value="{{ form.year.value|default:'' }}" placeholder="e.g. 2026">
+        </div>
+        <div class="mb-3 form-check">
+          <input type="checkbox" name="is_active" class="form-check-input" id="is_active"
+                 {% if form.is_active.value %}checked{% endif %}>
+          <label class="form-check-label" for="is_active">Active Assignment</label>
+        </div>
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger small">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci px-4">Save Assignment</button>
+          <a href="{% url 'leadership_directory' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

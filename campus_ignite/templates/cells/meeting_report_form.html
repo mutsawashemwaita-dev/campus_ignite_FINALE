@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Meeting Report – {{ cell.name }}{% endblock %}
+{% block page_title %}Cell Meeting Report{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="mb-3">
+      <span class="badge-role me-2">{{ cell.name }}</span>
+      <a href="{% url 'cell_detail' cell.pk %}" class="text-muted small"><i class="fas fa-arrow-left me-1"></i>Back to cell</a>
+    </div>
+    <div class="ci-form-card">
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-clock me-1"></i>Session Details</h6>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Date</label>
+              {{ form.date }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Time Started</label>
+              {{ form.time_started }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Time Ended</label>
+              {{ form.time_ended }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Head Count</label>
+              {{ form.head_count }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Facilitated By</label>
+              {{ form.facilitated_by }}
+            </div>
+          </div>
+        </div>
+
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-file-alt me-1"></i>Report Content</h6>
+          <div class="mb-3">
+            <label class="form-label">Summary <span class="text-danger">*</span></label>
+            {{ form.summary }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-success"><i class="fas fa-thumbs-up me-1"></i>What Went Right</label>
+            {{ form.went_right }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-danger"><i class="fas fa-thumbs-down me-1"></i>What Went Wrong</label>
+            {{ form.went_wrong }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="color:var(--ci-accent);"><i class="fas fa-star me-1"></i>Highlights</label>
+            {{ form.highlights }}
+          </div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci px-4"><i class="fas fa-paper-plane me-2"></i>Submit Report</button>
+          <a href="{% url 'cell_detail' cell.pk %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

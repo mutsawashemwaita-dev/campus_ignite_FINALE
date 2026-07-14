@@ -1,0 +1,24 @@
+{% extends 'print/base_print.html' %}
+{% block print_title %}Notifications{% endblock %}
+{% block print_content %}
+<div class="print-meta">
+  <span><strong>User:</strong> {{ request.user.get_full_name }}</span>
+  <span><strong>Total:</strong> {{ notifications.count }}</span>
+  <span><strong>Unread:</strong> {{ notifications|length }}</span>
+</div>
+<h2>All Notifications</h2>
+{% for n in notifications %}
+<div class="notif-item {% if not n.is_read %}unread{% endif %}">
+  <div style="display:flex;justify-content:space-between;align-items:start;">
+    <div>
+      <strong style="color:#1A3C6E;">{{ n.title }}</strong>
+      {% if not n.is_read %}<span style="background:#C8A951;color:#fff;font-size:9px;padding:1px 6px;border-radius:10px;margin-left:6px;">UNREAD</span>{% endif %}
+      <p style="margin:3px 0;color:#444;">{{ n.message }}</p>
+      <small style="color:#999;">{{ n.created_at|date:"d M Y, H:i" }} &bull; {{ n.source_type }}</small>
+    </div>
+  </div>
+</div>
+{% empty %}
+<p>No notifications.</p>
+{% endfor %}
+{% endblock %}

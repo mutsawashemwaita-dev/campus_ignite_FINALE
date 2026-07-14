@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Leadership Directory{% endblock %}
+{% block page_title %}Leadership Directory{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <p class="text-muted mb-0">Organisational leadership for {{ year }}/{{ year|add:"1"|slice:"-2" }}. Each position has a Leader and 2IC.</p>
+</div>
+<div class="row g-3">
+  {% for pos in positions %}
+  {% with a=assignments|default_if_none:'' %}
+  <div class="col-md-6 col-lg-4">
+    <div class="leader-card">
+      <div class="pos-title mb-2">
+        <i class="fas {% if 'chair' in pos.name %}fa-crown{% elif 'choir' in pos.name %}fa-music{% elif 'prayer' in pos.name %}fa-praying-hands{% elif 'marketing' in pos.name %}fa-bullhorn{% elif 'hospitality' in pos.name %}fa-handshake{% elif 'evangelism' in pos.name %}fa-bible{% else %}fa-users{% endif %} me-1"></i>
+        {{ pos }}
+      </div>
+      {% if assignments|length > 0 %}
+        {% for pid, a in assignments.items %}
+          {% if pid == pos.pk %}
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <div class="avatar">{{ a.leader.first_name|first }}{{ a.leader.last_name|first }}</div>
+            <div>
+              <div class="lead-name">{{ a.leader.get_full_name }}</div>
+              <small class="text-muted" style="font-size:.72rem;">Leader</small>
+            </div>
+          </div>
+          {% if a.second_in_cmd %}
+          <div class="d-flex align-items-center gap-2">
+            <div class="avatar" style="width:32px;height:32px;font-size:.75rem;">{{ a.second_in_cmd.first_name|first }}{{ a.second_in_cmd.last_name|first }}</div>
+            <div>
+              <div class="lead-2ic">{{ a.second_in_cmd.get_full_name }}</div>
+              <small class="text-muted" style="font-size:.7rem;">2IC</small>
+            </div>
+          </div>
+          {% else %}
+          <div class="lead-2ic text-muted"><i class="fas fa-user-slash me-1"></i>No 2IC assigned</div>
+          {% endif %}
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <div class="text-muted small"><i class="fas fa-user-slash me-1"></i>Not yet assigned</div>
+      {% endif %}
+      {% if user.is_admin or user.is_pastor %}
+      <div class="mt-3">
+        <a href="{% url 'assign_leader' pos.pk %}" class="btn btn-sm btn-outline-primary w-100">
+          <i class="fas fa-edit me-1"></i>Assign / Update
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endwith %}
+  {% endfor %}
+</div>
+{% endblock %}

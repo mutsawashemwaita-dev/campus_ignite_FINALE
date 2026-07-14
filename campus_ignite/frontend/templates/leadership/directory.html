@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load leadership_tags %}
+{% block title %}Leadership Directory{% endblock %}
+{% block page_title %}Leadership Directory{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <p class="text-muted mb-0">Organisational leadership for {{ year }}. Each position has a Leader and 2IC.</p>
+</div>
+
+{% if not positions %}
+<div class="alert alert-warning">
+  <i class="fas fa-exclamation-triangle me-2"></i>
+  No leadership positions found. Run <code>python manage.py setup_admin</code> to load them.
+</div>
+{% endif %}
+
+<div class="row g-3">
+  {% for pos in positions %}
+  <div class="col-md-6 col-lg-4">
+    <div class="leader-card">
+      <div class="pos-title mb-3">
+        <i class="fas
+          {% if 'chair' in pos.name %}fa-crown
+          {% elif 'choir' in pos.name %}fa-music
+          {% elif 'prayer' in pos.name %}fa-praying-hands
+          {% elif 'marketing' in pos.name %}fa-bullhorn
+          {% elif 'hospitality' in pos.name %}fa-handshake
+          {% elif 'evangelism' in pos.name %}fa-bible
+          {% else %}fa-users{% endif %}
+          me-1"></i>
+        {{ pos }}
+      </div>
+
+      {% with a=assignments|get_item:pos.pk %}
+      {% if a %}
+        <!-- Leader -->
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <div class="avatar">{{ a.leader.first_name|first|upper }}{{ a.leader.last_name|first|upper }}</div>
+          <div>
+            <div class="lead-name">{{ a.leader.get_full_name }}</div>
+            <small class="text-muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;">Leader</small>
+          </div>
+        </div>
+        <!-- 2IC -->
+        {% if a.second_in_cmd %}
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="avatar" style="width:34px;height:34px;font-size:.78rem;background:#f0f4ff;">
+            {{ a.second_in_cmd.first_name|first|upper }}{{ a.second_in_cmd.last_name|first|upper }}
+          </div>
+          <div>
+            <div class="lead-2ic">{{ a.second_in_cmd.get_full_name }}</div>
+            <small class="text-muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;">2IC</small>
+          </div>
+        </div>
+        {% else %}
+        <p class="text-muted small mb-3"><i class="fas fa-user-slash me-1"></i>No 2IC assigned yet</p>
+        {% endif %}
+      {% else %}
+        <p class="text-muted small mb-3"><i class="fas fa-user-slash me-1"></i>Not yet assigned</p>
+      {% endif %}
+      {% endwith %}
+
+      {% if user.is_admin or user.is_pastor %}
+      <a href="{% url 'assign_leader' pos.pk %}" class="btn btn-sm btn-outline-primary w-100">
+        <i class="fas fa-edit me-1"></i>
+        {% with a=assignments|get_item:pos.pk %}{% if a %}Update{% else %}Assign{% endif %}{% endwith %} Leader & 2IC
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

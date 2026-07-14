@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Consolidated Report{% endblock %}
+{% block page_title %}Send Consolidated Cell Report{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="alert alert-info small">
+      <i class="fas fa-info-circle me-1"></i>
+      This consolidated report will be sent directly to all active pastors once submitted.
+    </div>
+    <div class="ci-form-card">
+      <form method="post">
+        {% csrf_token %}
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-calendar me-1"></i>Report Period</h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">From Date</label>
+              {{ form.period_start }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">To Date</label>
+              {{ form.period_end }}
+            </div>
+          </div>
+        </div>
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-people-group me-1"></i>Cells Included</h6>
+          {{ form.cells_included }}
+        </div>
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-file-alt me-1"></i>Meeting Reports Included</h6>
+          {{ form.reports_included }}
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Overall Summary <span class="text-danger">*</span></label>
+          {{ form.summary }}
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci-gold px-4"><i class="fas fa-paper-plane me-2"></i>Send to Pastors</button>
+          <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

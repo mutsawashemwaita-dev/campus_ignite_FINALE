@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="mb-3"><a href="{% url 'member_list' %}" class="text-muted small"><i class="fas fa-arrow-left me-1"></i>Back to People</a></div>
+    <div class="ci-form-card">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Personal Details -->
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-user me-1"></i>Personal Details</h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">First Name <span class="text-danger">*</span></label>
+              <input type="text" name="first_name" class="form-control"
+                     value="{{ form.first_name.value|default:'' }}" placeholder="First name">
+              {% if form.first_name.errors %}<div class="text-danger small">{{ form.first_name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Last Name <span class="text-danger">*</span></label>
+              <input type="text" name="last_name" class="form-control"
+                     value="{{ form.last_name.value|default:'' }}" placeholder="Last name">
+              {% if form.last_name.errors %}<div class="text-danger small">{{ form.last_name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Phone</label>
+              <input type="text" name="phone" class="form-control"
+                     value="{{ form.phone.value|default:'' }}" placeholder="Phone number">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control"
+                     value="{{ form.email.value|default:'' }}" placeholder="Email address">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">
+                <i class="fas fa-birthday-cake me-1" style="color:var(--ci-accent);"></i>Birthday
+              </label>
+              <input type="date" name="birthday" class="form-control"
+                     value="{{ form.birthday.value|default:'' }}">
+              <small class="text-muted">Automatically recorded in Hospitality birthdays</small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Photo</label>
+              <input type="file" name="photo" class="form-control" accept="image/*">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Notes</label>
+              <textarea name="notes" class="form-control" rows="2"
+                        placeholder="Any notes about this person...">{{ form.notes.value|default:'' }}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Login & Role — OPTIONAL -->
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-key me-1"></i>Login & Role
+            <span class="badge bg-secondary ms-2" style="font-size:.7rem;font-weight:400;">Optional</span>
+          </h6>
+          <div class="alert alert-info py-2 small mb-3">
+            <i class="fas fa-info-circle me-1"></i>
+            Only fill this section if this person needs to <strong>log in to the system</strong>
+            (e.g. cell leaders, pastors, facilitators). Regular members can be left without a login.
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Username <span class="text-muted">(optional)</span></label>
+              <input type="text" name="username" class="form-control"
+                     value="{{ form.username.value|default:'' }}"
+                     placeholder="e.g. john_doe">
+              {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Role <span class="text-muted">(optional)</span></label>
+              <input type="text" name="role_name" class="form-control"
+                     value="{{ form.role_name.value|default:'' }}"
+                     placeholder="pastor / cell_leader / facilitator / leadership / admin">
+              {% if form.role_name.errors %}<div class="text-danger small">{{ form.role_name.errors.0 }}</div>{% endif %}
+            </div>
+            {% if not edit %}
+            <div class="col-md-6">
+              <label class="form-label">Password <span class="text-muted">(required if username set)</span></label>
+              <input type="password" name="password" class="form-control" placeholder="Set a password">
+              {% if form.password.errors %}<div class="text-danger small">{{ form.password.errors.0 }}</div>{% endif %}
+            </div>
+            {% else %}
+            <div class="col-md-6">
+              <label class="form-label">New Password <span class="text-muted">(leave blank to keep)</span></label>
+              <input type="password" name="new_password" class="form-control" placeholder="Only fill to change password">
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger small mb-3">
+          {% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci px-4">
+            <i class="fas fa-save me-2"></i>{% if edit %}Update{% else %}Add Person{% endif %}
+          </button>
+          <a href="{% url 'member_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Consolidated Report{% endblock %}
+{% block page_title %}Send Consolidated Cell Report{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="alert alert-info small">
+      <i class="fas fa-info-circle me-1"></i>
+      This consolidated report will be sent directly to all active pastors once submitted.
+    </div>
+    <div class="ci-form-card">
+      <form method="post">
+        {% csrf_token %}
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-calendar me-1"></i>Report Period</h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">From Date <span class="text-danger">*</span></label>
+              <input type="date" name="period_start" class="form-control" value="{{ form.period_start.value|default:'' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">To Date <span class="text-danger">*</span></label>
+              <input type="date" name="period_end" class="form-control" value="{{ form.period_end.value|default:'' }}">
+            </div>
+          </div>
+        </div>
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-people-group me-1"></i>Cells Included</h6>
+          <div class="mb-3">
+            <label class="form-label">Cell Names <span class="text-danger">*</span></label>
+            <input type="text" name="cell_names" class="form-control"
+                   value="{{ form.cell_names.value|default:'' }}"
+                   placeholder="e.g. Zion Cell, Grace Cell, Faith Cell">
+            <small class="text-muted">Separate multiple cell names with commas</small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Combined Total Headcount <span class="text-danger">*</span></label>
+            <input type="number" name="total_headcount" class="form-control"
+                   value="{{ form.total_headcount.value|default:'' }}"
+                   placeholder="Total number of people across all cells">
+          </div>
+        </div>
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-file-alt me-1"></i>Report Content</h6>
+          <div class="mb-3">
+            <label class="form-label">Overall Summary <span class="text-danger">*</span></label>
+            <textarea name="summary" class="form-control" rows="5"
+                      placeholder="Write the overall consolidated summary of all cells for this period...">{{ form.summary.value|default:'' }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="color:var(--ci-accent);"><i class="fas fa-star me-1"></i>Overall Highlights</label>
+            <textarea name="highlights" class="form-control" rows="3"
+                      placeholder="Key highlights across all cells...">{{ form.highlights.value|default:'' }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Challenges Faced</label>
+            <textarea name="challenges" class="form-control" rows="3"
+                      placeholder="Key challenges or areas for improvement...">{{ form.challenges.value|default:'' }}</textarea>
+          </div>
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-danger small">
+          {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
+        </div>
+        {% endif %}
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci-gold px-4"><i class="fas fa-paper-plane me-2"></i>Send to Pastors</button>
+          <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

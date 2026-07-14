@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Add Member{% endblock %}
+{% block page_title %}Add Member to {{ dept.name }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-5">
+    <div class="mb-3"><a href="{% url 'department_detail' dept.pk %}" class="text-muted small"><i class="fas fa-arrow-left me-1"></i>Back to {{ dept.name }}</a></div>
+    <div class="ci-form-card">
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label">Member Username <span class="text-danger">*</span></label>
+          <input type="text" name="member_username" class="form-control" placeholder="Type the person's username">
+          {% if form.member_username.errors %}<div class="text-danger small">{{ form.member_username.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Role in Department</label>
+          <input type="text" name="role_in_dept" class="form-control" placeholder="e.g. Soprano, Sound Engineer, Usher">
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci px-4"><i class="fas fa-user-plus me-2"></i>Add Member</button>
+          <a href="{% url 'department_detail' dept.pk %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

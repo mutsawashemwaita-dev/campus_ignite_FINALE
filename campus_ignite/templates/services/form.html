@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Record Service{% endblock %}
+{% block page_title %}Record a Service{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="ci-form-card">
+      <form method="post">
+        {% csrf_token %}
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-church me-1"></i>Service Info</h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Date <span class="text-danger">*</span></label>
+              {{ form.date }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Head Count <span class="text-danger">*</span></label>
+              {{ form.head_count }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Preacher (system user)</label>
+              {{ form.preacher }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Guest Preacher <span class="text-muted">(if external)</span></label>
+              {{ form.guest_preacher }}
+            </div>
+          </div>
+        </div>
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-book-open me-1"></i>Message</h6>
+          <div class="mb-3">
+            <label class="form-label">Message Title <span class="text-danger">*</span></label>
+            {{ form.message_title }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Message Summary <span class="text-danger">*</span></label>
+            {{ form.message_summary }}
+          </div>
+        </div>
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-list-ol me-1"></i>Flow of Service</h6>
+          <p class="text-muted small">Enter each part of the service on a new line.</p>
+          {{ form.flow_of_service }}
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci px-4"><i class="fas fa-save me-2"></i>Save Service</button>
+          <a href="{% url 'service_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

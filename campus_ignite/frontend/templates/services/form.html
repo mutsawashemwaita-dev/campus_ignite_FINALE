@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Record Service{% endblock %}
+{% block page_title %}Record a Service{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="ci-form-card">
+      <form method="post">
+        {% csrf_token %}
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-church me-1"></i>Service Info</h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Date <span class="text-danger">*</span></label>
+              <input type="date" name="date" class="form-control" value="{{ form.date.value|default:'' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Head Count <span class="text-danger">*</span></label>
+              <input type="number" name="head_count" class="form-control" value="{{ form.head_count.value|default:'' }}" placeholder="Total number of people in attendance">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Preacher Username <span class="text-muted">(if in system)</span></label>
+              <input type="text" name="preacher_username" class="form-control" value="{{ form.preacher_username.value|default:'' }}" placeholder="Type username if they have an account">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Guest Preacher Name <span class="text-muted">(if external)</span></label>
+              <input type="text" name="guest_preacher" class="form-control" value="{{ form.guest_preacher.value|default:'' }}" placeholder="Full name of external preacher">
+            </div>
+          </div>
+        </div>
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-book-open me-1"></i>Message</h6>
+          <div class="mb-3">
+            <label class="form-label">Message Title <span class="text-danger">*</span></label>
+            <input type="text" name="message_title" class="form-control" value="{{ form.message_title.value|default:'' }}" placeholder="Title of the message preached">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Message Summary <span class="text-danger">*</span></label>
+            <textarea name="message_summary" class="form-control" rows="4" placeholder="Brief summary of what was preached...">{{ form.message_summary.value|default:'' }}</textarea>
+          </div>
+        </div>
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-list-ol me-1"></i>Flow of Service</h6>
+          <p class="text-muted small mb-2">Enter each part of the service on a new line.</p>
+          <textarea name="flow_of_service" class="form-control" rows="7"
+                    placeholder="Praise & Worship&#10;Opening Prayer&#10;Announcements&#10;Offering&#10;Sermon&#10;Altar Call&#10;Benediction">{{ form.flow_of_service.value|default:'' }}</textarea>
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-danger small">
+          {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
+        </div>
+        {% endif %}
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci px-4"><i class="fas fa-save me-2"></i>Save Service</button>
+          <a href="{% url 'service_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

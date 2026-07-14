@@ -1,0 +1,27 @@
+[
+  {
+    "model": "accounts.role",
+    "pk": 1,
+    "fields": { "name": "admin" }
+  },
+  {
+    "model": "accounts.role",
+    "pk": 2,
+    "fields": { "name": "pastor" }
+  },
+  {
+    "model": "accounts.role",
+    "pk": 3,
+    "fields": { "name": "cell_leader" }
+  },
+  {
+    "model": "accounts.role",
+    "pk": 4,
+    "fields": { "name": "facilitator" }
+  },
+  {
+    "model": "accounts.role",
+    "pk": 5,
+    "fields": { "name": "leadership" }
+  }
+]

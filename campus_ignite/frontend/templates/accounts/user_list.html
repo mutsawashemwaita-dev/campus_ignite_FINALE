@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}People{% endblock %}
+{% block page_title %}People & Members{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <p class="text-muted mb-0">Everyone registered in Campus Ignite.</p>
+  <a href="{% url 'user_create' %}" class="btn btn-ci">
+    <i class="fas fa-user-plus me-2"></i>Add Person
+  </a>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-3" id="peopleTabs">
+  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#system-users">
+    <i class="fas fa-key me-1"></i>System Users ({{ users.count }})</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#members">
+    <i class="fas fa-users me-1"></i>Members / No Login ({{ members.count }})</a></li>
+</ul>
+
+<div class="tab-content">
+  <!-- System Users -->
+  <div class="tab-pane fade show active" id="system-users">
+    <div class="mb-3">
+      <input type="text" id="userSearch" class="form-control" placeholder="Search by name or username...">
+    </div>
+    <div class="ci-card card">
+      <div class="table-responsive">
+        <table class="table ci-table mb-0">
+          <thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Birthday</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="usersTable">
+            {% for u in users %}
+            <tr class="user-row" data-name="{{ u.get_full_name|lower }} {{ u.username|lower }}">
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="avatar" style="width:32px;height:32px;font-size:.76rem;flex-shrink:0;">
+                    {% if u.photo %}<img src="{{ u.photo.url }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+                    {% else %}{{ u.first_name|first|upper }}{{ u.last_name|first|upper }}{% endif %}
+                  </div>
+                  <span class="fw-semibold" style="color:var(--ci-primary);">{{ u.get_full_name }}</span>
+                </div>
+              </td>
+              <td><code style="background:var(--ci-light);color:var(--ci-primary);padding:.15em .5em;border-radius:4px;">{{ u.username }}</code></td>
+              <td><span class="badge-role">{{ u.role|default:"No Role" }}</span></td>
+              <td>{% if u.birthday %}<i class="fas fa-birthday-cake me-1" style="color:var(--ci-accent);"></i>{{ u.birthday|date:"d M" }}{% else %}—{% endif %}</td>
+              <td>{{ u.phone|default:"—" }}</td>
+              <td>
+                {% if u.is_active %}<span style="color:#198754;font-size:.82rem;font-weight:600;">Active</span>
+                {% else %}<span style="color:#dc3545;font-size:.82rem;font-weight:600;">Inactive</span>{% endif %}
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a href="{% url 'user_edit' u.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                  {% if u != request.user %}
+                    {% if u.is_active %}
+                    <a href="{% url 'user_deactivate' u.pk %}" class="btn btn-sm btn-outline-danger" data-confirm="Deactivate {{ u.get_full_name }}?"><i class="fas fa-user-slash"></i></a>
+                    {% else %}
+                    <a href="{% url 'user_activate' u.pk %}" class="btn btn-sm btn-outline-success"><i class="fas fa-user-check"></i></a>
+                    {% endif %}
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-center text-muted py-4">No system users yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Members (no login) -->
+  <div class="tab-pane fade" id="members">
+    <div class="ci-card card">
+      <div class="table-responsive">
+        <table class="table ci-table mb-0">
+          <thead><tr><th>Name</th><th>Birthday</th><th>Phone</th><th>Email</th><th>Notes</th><th>Actions</th></tr></thead>
+          <tbody>
+            {% for m in members %}
+            <tr>
+              <td class="fw-semibold" style="color:var(--ci-primary);">{{ m.get_full_name }}</td>
+              <td>{% if m.birthday %}<i class="fas fa-birthday-cake me-1" style="color:var(--ci-accent);"></i>{{ m.birthday|date:"d M" }}{% else %}—{% endif %}</td>
+              <td>{{ m.phone|default:"—" }}</td>
+              <td>{{ m.email|default:"—" }}</td>
+              <td>{{ m.notes|truncatewords:8|default:"—" }}</td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a href="{% url 'member_edit' m.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                  <a href="{% url 'member_delete' m.pk %}" class="btn btn-sm btn-outline-danger"
+                     data-confirm="Remove {{ m.get_full_name }}?"><i class="fas fa-trash"></i></a>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center text-muted py-4">No non-login members yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mt-2 text-muted small">
+      <i class="fas fa-info-circle me-1"></i>
+      These people are in the system but do not have login access. Add them to cells using their full name.
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('userSearch').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.user-row').forEach(function(row) {
+    row.style.display = row.dataset.name.includes(q) ? '' : 'none';
+  });
+});
+</script>
+{% endblock %}

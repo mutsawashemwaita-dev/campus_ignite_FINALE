@@ -1,0 +1,42 @@
+{% extends 'print/base_print.html' %}
+{% block print_title %}Cell Reports – {{ cell.name }}{% endblock %}
+{% block print_content %}
+<div class="print-meta">
+  <span><strong>Cell:</strong> {{ cell.name }}</span>
+  <span><strong>Type:</strong> {{ cell.cell_type }}</span>
+  <span><strong>Facilitator:</strong> {{ cell.facilitator.get_full_name }}</span>
+  {% if cell.second_in_cmd %}<span><strong>2IC:</strong> {{ cell.second_in_cmd.get_full_name }}</span>{% endif %}
+  <span><strong>Total Reports:</strong> {{ reports.count }}</span>
+</div>
+
+<h2>Meeting Reports</h2>
+{% for r in reports %}
+<div class="report-card">
+  <div class="rc-header">
+    <div class="rc-title">{{ r.date }} &ndash; Facilitated by {{ r.facilitated_by.get_full_name }}</div>
+    <span class="rc-badge">HC: {{ r.head_count }}</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;font-size:10px;">
+    <div><strong>Started:</strong> {{ r.time_started|time:"H:i" }}</div>
+    <div><strong>Ended:</strong> {{ r.time_ended|time:"H:i" }}</div>
+    <div><strong>Submitted:</strong> {{ r.submitted_at|date:"d M Y" }}</div>
+  </div>
+  <div class="section-label">Summary</div>
+  <p>{{ r.summary }}</p>
+  {% if r.went_right %}
+  <div class="section-label">✅ What Went Right</div>
+  <div class="went-right">{{ r.went_right }}</div>
+  {% endif %}
+  {% if r.went_wrong %}
+  <div class="section-label">❌ What Went Wrong</div>
+  <div class="went-wrong">{{ r.went_wrong }}</div>
+  {% endif %}
+  {% if r.highlights %}
+  <div class="section-label">⭐ Highlights</div>
+  <div class="highlight">{{ r.highlights }}</div>
+  {% endif %}
+</div>
+{% empty %}
+<p>No meeting reports for this cell.</p>
+{% endfor %}
+{% endblock %}

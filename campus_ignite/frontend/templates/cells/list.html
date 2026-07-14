@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Cells{% endblock %}
+{% block page_title %}Cell Groups{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <p class="text-muted mb-0">All active cell groups.</p>
+  {% if user.is_admin or user.is_pastor or user.is_cell_leader %}
+  <a href="{% url 'cell_create' %}" class="btn btn-ci"><i class="fas fa-plus me-2"></i>New Cell</a>
+  {% endif %}
+</div>
+
+<div class="ci-card card">
+  <div class="table-responsive">
+    <table class="table ci-table mb-0">
+      <thead><tr>
+        <th>Cell Name</th><th>Type</th><th>Facilitator</th><th>2IC</th>
+        <th>Day / Time</th><th>Actions</th>
+      </tr></thead>
+      <tbody>
+        {% for cell in cells %}
+        <tr>
+          <td class="fw-semibold" style="color:var(--ci-primary);">{{ cell.name }}</td>
+          <td><span class="badge-role">{{ cell.cell_type }}</span></td>
+          <td>{{ cell.facilitator.get_full_name }}</td>
+          <td>{{ cell.second_in_cmd.get_full_name|default:"—" }}</td>
+          <td>{{ cell.meeting_day }} {{ cell.meeting_time }}</td>
+          <td>
+            <a href="{% url 'cell_detail' cell.pk %}" class="btn btn-sm btn-ci">View</a>
+            {% if user.is_admin or user.is_pastor %}
+            <a href="{% url 'cell_update' cell.pk %}" class="btn btn-sm btn-outline-secondary ms-1">Edit</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No cells yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

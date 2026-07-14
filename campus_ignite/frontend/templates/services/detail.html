@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}{{ service.message_title }}{% endblock %}
+{% block page_title %}Service Record{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <a href="{% url 'service_list' %}" class="text-muted small">
+    <i class="fas fa-arrow-left me-1"></i>All Services
+  </a>
+  <div class="d-flex gap-2">
+    <a href="{% url 'print_service' service.pk %}" class="btn btn-sm btn-outline-secondary" target="_blank">
+      <i class="fas fa-print me-1"></i>Print
+    </a>
+    <a href="{% url 'pdf_service' service.pk %}" class="btn btn-sm btn-ci-gold" target="_blank">
+      <i class="fas fa-file-pdf me-1"></i>Save PDF
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Left: Main details -->
+  <div class="col-lg-8">
+    <div class="ci-card card p-4 mb-3">
+      <!-- Stats row -->
+      <div class="d-flex flex-wrap gap-3 mb-4">
+        <div class="ci-stat py-2 px-3">
+          <div class="lbl"><i class="fas fa-calendar me-1"></i>Date</div>
+          <div class="fw-bold" style="color:var(--ci-primary);">{{ service.date }}</div>
+        </div>
+        <div class="ci-stat py-2 px-3">
+          <div class="lbl"><i class="fas fa-users me-1"></i>Headcount</div>
+          <div class="num" style="font-size:1.6rem;">{{ service.head_count }}</div>
+        </div>
+        <div class="ci-stat py-2 px-3 flex-grow-1">
+          <div class="lbl"><i class="fas fa-microphone me-1"></i>Preacher</div>
+          <div class="fw-bold" style="color:var(--ci-primary);">
+            {% if service.guest_preacher %}{{ service.guest_preacher }}
+            {% elif service.preacher %}{{ service.preacher.get_full_name }}
+            {% else %}—{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Message -->
+      <h5 class="fw-bold mb-2" style="color:var(--ci-primary);">
+        <i class="fas fa-book-open me-2" style="color:var(--ci-accent);"></i>{{ service.message_title }}
+      </h5>
+      <p class="text-muted small mb-1 fw-semibold">Message Summary</p>
+      <p style="line-height:1.7;">{{ service.message_summary }}</p>
+
+      <small class="text-muted">
+        Recorded by {{ service.recorded_by.get_full_name }} on {{ service.created_at|date:"d M Y" }}
+      </small>
+    </div>
+  </div>
+
+  <!-- Right: Flow of service -->
+  <div class="col-lg-4">
+    <div class="ci-card card p-3">
+      <h6 class="ci-section-header">
+        <i class="fas fa-list-ol me-2"></i>Flow of Service
+      </h6>
+      {% for step in service.get_flow_list %}
+      <div class="flow-step">
+        <div class="flow-num">{{ forloop.counter }}</div>
+        <span style="font-size:.88rem;">{{ step }}</span>
+      </div>
+      {% empty %}
+      <p class="text-muted small">No flow recorded.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

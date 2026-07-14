@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Campus Ignite{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="{% static 'css/campus_ignite.css' %}" rel="stylesheet">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% if user.is_authenticated %}
+
+<!-- Mobile toggle -->
+<button id="sidebar-toggle" class="btn btn-sm d-md-none position-fixed" style="top:1rem;left:1rem;z-index:300;background:var(--ci-primary);color:#fff;border-radius:8px;">
+  <i class="fas fa-bars"></i>
+</button>
+
+<!-- Sidebar -->
+<aside class="ci-sidebar">
+  <div class="brand">
+    <h5><i class="fas fa-fire me-2"></i>Campus Ignite</h5>
+    <small>Campus Christian Institution</small>
+  </div>
+
+  <nav class="mt-2 flex-grow-1">
+    <div class="nav-section">Main</div>
+    <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+      <i class="fas fa-th-large"></i> Dashboard
+    </a>
+
+    <div class="nav-section">Ministry</div>
+    <a href="{% url 'pastor_list' %}" class="nav-link {% if 'pastors' in request.path %}active{% endif %}">
+      <i class="fas fa-cross"></i> Pastoral Team
+    </a>
+    <a href="{% url 'leadership_directory' %}" class="nav-link {% if 'leadership' in request.path %}active{% endif %}">
+      <i class="fas fa-users-cog"></i> Leadership
+    </a>
+    <a href="{% url 'cell_list' %}" class="nav-link {% if 'cells' in request.path %}active{% endif %}">
+      <i class="fas fa-people-group"></i> Cells
+    </a>
+    <a href="{% url 'service_list' %}" class="nav-link {% if 'services' in request.path %}active{% endif %}">
+      <i class="fas fa-church"></i> Services
+    </a>
+
+    {% if user.is_cell_leader or user.is_admin or user.is_pastor %}
+    <div class="nav-section">Reports</div>
+    <a href="{% url 'consolidated_report' %}" class="nav-link">
+      <i class="fas fa-file-export"></i> Send Report
+    </a>
+    {% endif %}
+
+    <div class="nav-section">Account</div>
+    <a href="{% url 'notification_list' %}" class="nav-link {% if 'notifications' in request.path %}active{% endif %}">
+      <i class="fas fa-bell"></i> Notifications
+      {% if unread_notifications > 0 %}
+        <span class="ms-auto badge bg-danger rounded-pill notif-badge">{{ unread_notifications }}</span>
+      {% endif %}
+    </a>
+    <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+      <i class="fas fa-user-circle"></i> My Profile
+    </a>
+
+    <hr class="nav-divider">
+    <a href="{% url 'logout' %}" class="nav-link" style="color:rgba(255,100,100,.8);">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </nav>
+
+  <div class="px-3 pb-3">
+    <div class="d-flex align-items-center gap-2 mt-2">
+      <div class="avatar" style="width:34px;height:34px;font-size:.8rem;">
+        {% if user.photo %}
+          <img src="{{ user.photo.url }}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">
+        {% else %}
+          {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        {% endif %}
+      </div>
+      <div>
+        <div style="color:#fff;font-size:.8rem;font-weight:600;">{{ user.get_full_name|default:user.username }}</div>
+        <div style="color:rgba(255,255,255,.45);font-size:.7rem;">{{ user.role }}</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main content -->
+<div class="ci-main">
+  <div class="ci-topbar">
+    <h5>{% block page_title %}Dashboard{% endblock %}</h5>
+    <div class="d-flex align-items-center gap-3">
+      <a href="{% url 'notification_list' %}" class="btn btn-sm btn-outline-secondary position-relative">
+        <i class="fas fa-bell"></i>
+        {% if unread_notifications > 0 %}
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notif-badge" style="font-size:.6rem;">{{ unread_notifications }}</span>
+        {% endif %}
+      </a>
+      <span class="text-muted small d-none d-md-inline">
+        <span class="badge-role">{{ user.role }}</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="ci-page">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show ci-auto-alert" role="alert">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'danger' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+{% else %}
+  {% block auth_content %}{% endblock %}
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/campus_ignite.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

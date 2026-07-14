@@ -1,0 +1,21 @@
+{% extends 'print/base_print.html' %}
+{% block print_title %}Service Record – {{ service.date }}{% endblock %}
+{% block print_content %}
+<div class="print-meta">
+  <span><strong>Date:</strong> {{ service.date }}</span>
+  <span><strong>Preacher:</strong> {{ service.guest_preacher|default:service.preacher.get_full_name|default:"—" }}</span>
+  <span><strong>Headcount:</strong> {{ service.head_count }}</span>
+  <span><strong>Recorded by:</strong> {{ service.recorded_by.get_full_name }}</span>
+</div>
+
+<h2>{{ service.message_title }}</h2>
+<div class="section-label">Message Summary</div>
+<p>{{ service.message_summary }}</p>
+
+<h2>Flow of Service</h2>
+<ol class="flow-list">
+  {% for step in service.get_flow_list %}
+  <li>{{ step }}</li>
+  {% endfor %}
+</ol>
+{% endblock %}

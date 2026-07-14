@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ cell.name }}{% endblock %}
+{% block page_title %}{{ cell.name }}{% endblock %}
+{% block extra_css %}
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+{% endblock %}
+{% block content %}
+
+<!-- Info bar -->
+<div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+  <span class="badge-role"><i class="fas fa-tag me-1"></i>{{ cell.cell_type }}</span>
+  <span class="text-muted small"><i class="fas fa-calendar-day me-1"></i>{{ cell.meeting_day }}s at {{ cell.meeting_time }}</span>
+  <span class="text-muted small"><i class="fas fa-map-marker-alt me-1"></i>{{ cell.venue|default:"Venue TBA" }}</span>
+  <div class="ms-auto d-flex flex-wrap gap-2">
+    <a href="{% url 'meeting_report_create' cell.pk %}" class="btn btn-sm btn-ci"><i class="fas fa-plus me-1"></i>Add Report</a>
+    <a href="{% url 'add_cell_member' cell.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-user-plus me-1"></i>Add Member</a>
+    <a href="{% url 'cell_event_create' cell.pk %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-calendar-plus me-1"></i>Add Event</a>
+    {% if user.is_admin or user.is_pastor %}<a href="{% url 'cell_members' cell.pk %}" class="btn btn-sm btn-ci"><i class="fas fa-users me-1"></i>Members ({{ cell.cell_members.count }})</a>
+    <a href="{% url 'cell_update' cell.pk %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i></a>{% endif %}
+    <a href="{% url 'print_cell_reports' cell.pk %}" class="btn btn-sm btn-outline-secondary" target="_blank"><i class="fas fa-print me-1"></i>Print</a>
+    <a href="{% url 'pdf_cell_reports' cell.pk %}" class="btn btn-sm btn-ci-gold" target="_blank"><i class="fas fa-file-pdf me-1"></i>Save PDF</a>
+  </div>
+</div>
+
+<!-- Leaders row -->
+<div class="row g-3 mb-4">
+  <div class="col-auto"><div class="ci-stat py-2 px-3"><div class="lbl">Facilitator</div><div class="fw-bold" style="color:var(--ci-primary);">{{ cell.facilitator.get_full_name }}</div></div></div>
+  {% if cell.second_in_cmd %}<div class="col-auto"><div class="ci-stat py-2 px-3" style="border-left-color:var(--ci-primary);"><div class="lbl">2IC</div><div class="fw-bold" style="color:var(--ci-primary);">{{ cell.second_in_cmd.get_full_name }}</div></div></div>{% endif %}
+  <div class="col-auto"><div class="ci-stat py-2 px-3" style="border-left-color:#198754;"><div class="lbl">Reports</div><div class="fw-bold" style="color:#198754;font-size:1.2rem;">{{ reports.count }}</div></div></div>
+  <div class="col-auto"><div class="ci-stat py-2 px-3" style="border-left-color:var(--ci-accent);"><div class="lbl">Members</div><div class="fw-bold" style="color:var(--ci-accent);font-size:1.2rem;">{{ cell_members.count }}</div></div></div>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-3" id="cellTabs">
+  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#reports"><i class="fas fa-file-alt me-1"></i>Meeting Reports</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#members-tab"><i class="fas fa-users me-1"></i>Members ({{ cell_members.count }})</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#calendar" id="cal-tab"><i class="fas fa-calendar me-1"></i>Calendar</a></li>
+</ul>
+
+<div class="tab-content">
+  <!-- Reports -->
+  <div class="tab-pane fade show active" id="reports">
+    {% if reports %}
+    <div class="ci-card card">
+      <div class="table-responsive">
+        <table class="table ci-table mb-0">
+          <thead><tr><th>Date</th><th>Facilitated By</th><th>Headcount</th><th>Time</th><th>Actions</th></tr></thead>
+          <tbody>
+            {% for r in reports %}
+            <tr>
+              <td>{{ r.date }}</td>
+              <td>{{ r.facilitated_by.get_full_name }}</td>
+              <td><span class="badge-hc">{{ r.head_count }}</span></td>
+              <td>{{ r.time_started|time:"H:i" }} – {{ r.time_ended|time:"H:i" }}</td>
+              <td><button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#rm{{ r.pk }}"><i class="fas fa-eye me-1"></i>View</button></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% for r in reports %}
+    <div class="modal fade" id="rm{{ r.pk }}" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header" style="background:var(--ci-primary);">
+            <h5 class="modal-title text-white">{{ cell.name }} – {{ r.date }}</h5>
+            <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3 mb-3">
+              <div class="col-6 col-md-3"><div class="ci-stat py-2 px-2"><div class="lbl">Headcount</div><div class="num" style="font-size:1.4rem;">{{ r.head_count }}</div></div></div>
+              <div class="col-6 col-md-3"><div class="ci-stat py-2 px-2 border-0 bg-light"><div class="lbl">Started</div><div class="fw-bold" style="color:var(--ci-primary);">{{ r.time_started|time:"H:i" }}</div></div></div>
+              <div class="col-6 col-md-3"><div class="ci-stat py-2 px-2 border-0 bg-light"><div class="lbl">Ended</div><div class="fw-bold" style="color:var(--ci-primary);">{{ r.time_ended|time:"H:i" }}</div></div></div>
+              <div class="col-6 col-md-3"><div class="ci-stat py-2 px-2 border-0 bg-light"><div class="lbl">Facilitated By</div><div style="font-size:.85rem;font-weight:600;color:var(--ci-primary);">{{ r.facilitated_by.get_full_name }}</div></div></div>
+            </div>
+            <hr>
+            <h6 class="fw-bold" style="color:var(--ci-primary);"><i class="fas fa-clipboard me-1"></i>Summary</h6><p>{{ r.summary }}</p>
+            {% if r.went_right %}<h6 class="fw-bold text-success"><i class="fas fa-thumbs-up me-1"></i>What Went Right</h6><p>{{ r.went_right }}</p>{% endif %}
+            {% if r.went_wrong %}<h6 class="fw-bold text-danger"><i class="fas fa-thumbs-down me-1"></i>What Went Wrong</h6><p>{{ r.went_wrong }}</p>{% endif %}
+            {% if r.highlights %}<h6 class="fw-bold" style="color:var(--ci-accent);"><i class="fas fa-star me-1"></i>Highlights</h6><p>{{ r.highlights }}</p>{% endif %}
+            <small class="text-muted">Submitted by {{ r.submitted_by.get_full_name }} on {{ r.submitted_at }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="text-center py-4 text-muted">
+      <i class="fas fa-file-alt fa-2x mb-2 d-block" style="opacity:.3;"></i>
+      No reports yet. <a href="{% url 'meeting_report_create' cell.pk %}">Submit the first one.</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Members tab -->
+  <div class="tab-pane fade" id="members-tab">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <p class="text-muted small mb-0">All members of {{ cell.name }}</p>
+      <a href="{% url 'add_cell_member' cell.pk %}" class="btn btn-sm btn-ci"><i class="fas fa-user-plus me-1"></i>Add Member</a>
+    </div>
+    {% if cell_members %}
+    <div class="ci-card card">
+      <div class="table-responsive">
+        <table class="table ci-table mb-0">
+          <thead><tr><th>Name</th><th>Birthday</th><th>Phone</th><th>Attendance</th><th>Since</th><th>Actions</th></tr></thead>
+          <tbody>
+            {% for cm in cell_members %}
+            <tr>
+              <td class="fw-semibold" style="color:var(--ci-primary);">{{ cm.get_name }}</td>
+              <td>{% if cm.get_birthday %}<i class="fas fa-birthday-cake me-1" style="color:var(--ci-accent);"></i>{{ cm.get_birthday|date:"d M" }}{% else %}—{% endif %}</td>
+              <td>{{ cm.get_phone|default:"—" }}</td>
+              <td>
+                <span class="badge-role" style="{% if cm.attendance_type == 'consistent' %}background:#d1f0e0;color:#146c43;{% elif cm.attendance_type == 'visitor' %}background:#fff3cd;color:#664d03;{% endif %}">
+                  {{ cm.get_attendance_type_display }}
+                </span>
+              </td>
+              <td>{{ cm.date_joined }}</td>
+              <td>
+                <a href="{% url 'remove_cell_member' cell.pk cm.pk %}" class="btn btn-sm btn-outline-danger"
+                   data-confirm="Remove {{ cm.get_name }} from {{ cell.name }}?">
+                  <i class="fas fa-times"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="text-center py-4 text-muted">
+      <i class="fas fa-users fa-2x mb-2 d-block" style="opacity:.3;"></i>
+      No members yet. <a href="{% url 'add_cell_member' cell.pk %}">Add the first member.</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Calendar -->
+  <div class="tab-pane fade" id="calendar">
+    <div class="d-flex justify-content-end mb-2">
+      <a href="{% url 'cell_event_create' cell.pk %}" class="btn btn-sm btn-ci-gold"><i class="fas fa-plus me-1"></i>Add Event</a>
+    </div>
+    <div class="ci-card card p-3"><div id="fullcalendar"></div></div>
+    {% if events %}
+    <div class="mt-3">
+      {% for e in events %}
+      <div class="ci-card card mb-2 p-3">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="fw-bold" style="color:var(--ci-primary);">{{ e.title }}</div>
+            <small class="text-muted"><i class="fas fa-calendar me-1"></i>{{ e.event_date }}{% if e.event_time %} at {{ e.event_time|time:"H:i" }}{% endif %}</small>
+            {% if e.description %}<p class="small text-muted mb-0 mt-1">{{ e.description }}</p>{% endif %}
+          </div>
+          <span class="badge-role">Upcoming</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+<script>
+let calendar;
+document.getElementById('cal-tab').addEventListener('shown.bs.tab', function () {
+  if (!calendar) {
+    calendar = new FullCalendar.Calendar(document.getElementById('fullcalendar'), {
+      initialView: 'dayGridMonth',
+      headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,listWeek' },
+      events: '{% url "cell_events_json" cell.pk %}',
+      eventClick: function(info) {
+        alert(info.event.title + (info.event.extendedProps.description ? '\n\n' + info.event.extendedProps.description : ''));
+      }
+    });
+    calendar.render();
+  }
+});
+</script>
+{% endblock %}

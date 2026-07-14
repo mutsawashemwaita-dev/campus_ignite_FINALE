@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="ci-form-card">
+      <form method="post">
+        {% csrf_token %}
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-people-group me-1"></i>Cell Details</h6>
+          <div class="mb-3">
+            <label class="form-label">Cell Name <span class="text-danger">*</span></label>
+            <input type="text" name="name" class="form-control" value="{{ form.name.value|default:'' }}" placeholder="e.g. Zion Cell, Grace Cell">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Cell Type <span class="text-danger">*</span></label>
+            <input type="text" name="cell_type_name" class="form-control" value="{{ form.cell_type_name.value|default:'' }}" placeholder="e.g. Freshman Cell, Ladies Cell, Graduate Cell, Couples Cell">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Venue</label>
+            <input type="text" name="venue" class="form-control" value="{{ form.venue.value|default:'' }}" placeholder="e.g. Room 4B, Campus Library">
+          </div>
+        </div>
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-clock me-1"></i>Meeting Schedule</h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Meeting Day <span class="text-danger">*</span></label>
+              <input type="text" name="meeting_day" class="form-control" value="{{ form.meeting_day.value|default:'' }}" placeholder="e.g. Monday, Wednesday, Friday">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Meeting Time <span class="text-danger">*</span></label>
+              <input type="time" name="meeting_time" class="form-control" value="{{ form.meeting_time.value|default:'' }}">
+            </div>
+          </div>
+        </div>
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-users me-1"></i>Leadership</h6>
+          <div class="mb-3">
+            <label class="form-label">Facilitator Username <span class="text-danger">*</span></label>
+            <input type="text" name="facilitator_username" class="form-control" value="{{ form.facilitator_username.value|default:'' }}" placeholder="Type the facilitator's username">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">2IC Username <span class="text-muted">(optional)</span></label>
+            <input type="text" name="second_in_cmd_username" class="form-control" value="{{ form.second_in_cmd_username.value|default:'' }}" placeholder="Type the 2IC's username">
+          </div>
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-danger small">
+          {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
+        </div>
+        {% endif %}
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci px-4">Save Cell</button>
+          <a href="{% url 'cell_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

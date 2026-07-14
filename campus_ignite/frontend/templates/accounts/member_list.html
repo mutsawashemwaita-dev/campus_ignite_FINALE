@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}People{% endblock %}
+{% block page_title %}People{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <p class="text-muted mb-0">Everyone in the Campus Ignite community.</p>
+  <a href="{% url 'member_create' %}" class="btn btn-ci"><i class="fas fa-user-plus me-2"></i>Add Person</a>
+</div>
+
+<!-- Filter tabs -->
+<ul class="nav nav-pills mb-3" id="roleFilter">
+  <li class="nav-item"><a class="nav-link active" href="#" data-role="all">All</a></li>
+  <li class="nav-item"><a class="nav-link" href="#" data-role="has-login">System Users</a></li>
+  <li class="nav-item"><a class="nav-link" href="#" data-role="no-login">Members Only</a></li>
+</ul>
+<div class="mb-3">
+  <input type="text" id="memberSearch" class="form-control" placeholder="Search by name...">
+</div>
+
+<div class="ci-card card">
+  <div class="table-responsive">
+    <table class="table ci-table mb-0" id="membersTable">
+      <thead><tr><th>Name</th><th>Phone</th><th>Birthday</th><th>Role / Login</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for m in members %}
+        <tr class="member-row"
+            data-name="{{ m.first_name|lower }} {{ m.last_name|lower }}"
+            data-login="{% if m.user_account %}has-login{% else %}no-login{% endif %}">
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="avatar" style="width:34px;height:34px;font-size:.8rem;flex-shrink:0;">
+                {% if m.photo %}<img src="{{ m.photo.url }}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">
+                {% else %}{{ m.first_name|first|upper }}{{ m.last_name|first|upper }}{% endif %}
+              </div>
+              <span class="fw-semibold" style="color:var(--ci-primary);">{{ m.get_full_name }}</span>
+            </div>
+          </td>
+          <td>{{ m.phone|default:"—" }}</td>
+          <td>
+            {% if m.birthday %}
+              <i class="fas fa-birthday-cake me-1" style="color:var(--ci-accent);"></i>
+              {{ m.birthday|date:"d M" }}
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if m.user_account %}
+              <span class="badge-role">{{ m.user_account.role }}</span>
+              <small class="text-muted d-block">@{{ m.user_account.username }}</small>
+            {% else %}
+              <span style="color:var(--ci-muted);font-size:.82rem;">Member only</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'member_edit' m.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+              <a href="{% url 'member_deactivate' m.pk %}" class="btn btn-sm btn-outline-danger"
+                 data-confirm="Remove {{ m.get_full_name }}?"><i class="fas fa-times"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted py-4">
+          No people added yet. <a href="{% url 'member_create' %}">Add the first person.</a>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelectorAll('#roleFilter .nav-link').forEach(tab => {
+  tab.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('#roleFilter .nav-link').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    filterRows(tab.dataset.role, document.getElementById('memberSearch').value);
+  });
+});
+document.getElementById('memberSearch').addEventListener('input', function() {
+  const role = document.querySelector('#roleFilter .nav-link.active').dataset.role;
+  filterRows(role, this.value);
+});
+function filterRows(role, search) {
+  document.querySelectorAll('.member-row').forEach(row => {
+    const matchRole   = role === 'all' || row.dataset.login === role;
+    const matchSearch = !search || row.dataset.name.includes(search.toLowerCase());
+    row.style.display = matchRole && matchSearch ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard – Campus Ignite{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+
+<!-- Stat Row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="ci-stat">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="lbl"><i class="fas fa-people-group me-1"></i> Active Cells</div>
+          <div class="num">{{ total_cells }}</div>
+        </div>
+        <i class="fas fa-people-group" style="font-size:1.6rem;color:var(--ci-accent);opacity:.4;"></i>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="ci-stat">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="lbl"><i class="fas fa-bell me-1"></i> Notifications</div>
+          <div class="num">{{ unread_count }}</div>
+        </div>
+        <i class="fas fa-bell" style="font-size:1.6rem;color:var(--ci-accent);opacity:.4;"></i>
+      </div>
+    </div>
+  </div>
+  {% if recent_service %}
+  <div class="col-12 col-md-6">
+    <div class="ci-stat" style="border-left-color:var(--ci-primary);">
+      <div class="lbl"><i class="fas fa-church me-1"></i> Last Service</div>
+      <div class="fw-bold" style="color:var(--ci-primary);font-size:1rem;">{{ recent_service.message_title }}</div>
+      <small class="text-muted">{{ recent_service.date }} &bull; Headcount: <strong>{{ recent_service.head_count }}</strong></small>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="row g-4">
+  <!-- Left column -->
+  <div class="col-lg-8">
+    {% if my_cells %}
+    <h6 class="ci-section-header"><i class="fas fa-people-group me-2"></i>My Cells</h6>
+    <div class="row g-3 mb-4">
+      {% for cell in my_cells %}
+      <div class="col-md-6">
+        <div class="ci-card card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h6 class="fw-bold mb-0" style="color:var(--ci-primary);">{{ cell.name }}</h6>
+              <span class="badge-role">{{ cell.cell_type }}</span>
+            </div>
+            <p class="text-muted small mb-3">
+              <i class="fas fa-calendar-day me-1"></i>{{ cell.meeting_day }}s
+              <i class="fas fa-clock ms-2 me-1"></i>{{ cell.meeting_time }}
+            </p>
+            <div class="d-flex gap-2">
+              <a href="{% url 'cell_detail' cell.pk %}" class="btn btn-sm btn-ci">View Cell</a>
+              <a href="{% url 'meeting_report_create' cell.pk %}" class="btn btn-sm btn-outline-secondary">+ Report</a>
+              <a href="{% url 'cell_event_create' cell.pk %}" class="btn btn-sm btn-outline-secondary">+ Event</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Quick actions -->
+    <h6 class="ci-section-header"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <a href="{% url 'cell_list' %}" class="card border-0 text-decoration-none h-100" style="background:var(--ci-light);border-radius:10px;">
+          <div class="card-body text-center py-3">
+            <i class="fas fa-people-group fa-lg mb-2" style="color:var(--ci-primary);"></i>
+            <div style="font-size:.82rem;font-weight:600;color:var(--ci-primary);">All Cells</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="{% url 'service_create' %}" class="card border-0 text-decoration-none h-100" style="background:var(--ci-light);border-radius:10px;">
+          <div class="card-body text-center py-3">
+            <i class="fas fa-church fa-lg mb-2" style="color:var(--ci-primary);"></i>
+            <div style="font-size:.82rem;font-weight:600;color:var(--ci-primary);">Record Service</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="{% url 'leadership_directory' %}" class="card border-0 text-decoration-none h-100" style="background:var(--ci-light);border-radius:10px;">
+          <div class="card-body text-center py-3">
+            <i class="fas fa-users-cog fa-lg mb-2" style="color:var(--ci-primary);"></i>
+            <div style="font-size:.82rem;font-weight:600;color:var(--ci-primary);">Leadership</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="{% url 'pastor_list' %}" class="card border-0 text-decoration-none h-100" style="background:var(--ci-light);border-radius:10px;">
+          <div class="card-body text-center py-3">
+            <i class="fas fa-cross fa-lg mb-2" style="color:var(--ci-primary);"></i>
+            <div style="font-size:.82rem;font-weight:600;color:var(--ci-primary);">Pastors</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right column -->
+  <div class="col-lg-4">
+    {% if pending_reports %}
+    <div class="ci-card card mb-3">
+      <div class="card-header"><i class="fas fa-file-alt me-2"></i>Recent Reports</div>
+      <ul class="list-group list-group-flush">
+        {% for r in pending_reports %}
+        <li class="list-group-item d-flex justify-content-between align-items-center py-2" style="font-size:.85rem;">
+          <div>
+            <div class="fw-semibold">{{ r.cell.name }}</div>
+            <small class="text-muted">{{ r.date }}</small>
+          </div>
+          <span class="badge-hc">{{ r.head_count }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <div class="ci-card card">
+      <div class="card-header"><i class="fas fa-bell me-2"></i>Recent Alerts</div>
+      {% if recent_notifications %}
+        <ul class="list-group list-group-flush">
+          {% for n in recent_notifications %}
+          <li class="list-group-item notif-item {% if not n.is_read %}unread{% endif %} py-2" style="font-size:.82rem;">
+            <div class="fw-semibold">{{ n.title }}</div>
+            <small class="text-muted">{{ n.created_at|timesince }} ago</small>
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="p-3 text-muted small">No recent notifications.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
