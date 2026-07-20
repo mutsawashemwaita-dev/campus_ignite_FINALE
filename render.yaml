@@ -2,14 +2,21 @@ services:
   - type: web
     name: campus-ignite
     runtime: python
-    pythonVersion: 3.12.0
     rootDir: campus_ignite/backend
-    buildCommand: pip install -r requirements.txt
+
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate
+
     startCommand: gunicorn campus_ignite_project.wsgi:application
+
     envVars:
-      - key: DATABASE_URL
-        sync: false
       - key: SECRET_KEY
         sync: false
+
       - key: DEBUG
-        value: false
+        value: "False"
+
+      - key: DATABASE_URL
+        sync: false
