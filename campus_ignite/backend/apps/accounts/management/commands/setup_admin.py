@@ -6,7 +6,7 @@ User = get_user_model()
 
 
 class Command(BaseCommand):
-    help = 'Creates all roles, leadership positions, and the default admin user.'
+    help = 'Creates all roles and the default admin user.'
 
     def handle(self, *args, **kwargs):
         # 1. Create all roles
@@ -15,22 +15,25 @@ class Command(BaseCommand):
             Role.objects.get_or_create(name=name)
             self.stdout.write(f'  Role ready: {name}')
 
-        # 2. Create all 7 leadership positions
-        from apps.leadership.models import LeadershipPosition
-        positions = [
-            ('chairperson',        'Chairperson',        1),
-            ('cell_leader',        'Cell Leader',        2),
-            ('marketing_leader',   'Marketing Leader',   3),
-            ('hospitality_leader', 'Hospitality Leader', 4),
-            ('evangelism_leader',  'Evangelism Leader',  5),
-            ('prayer_leader',      'Prayer Leader',      6),
-            ('choir_leader',       'Choir Leader',       7),
-        ]
-        for name, _, order in positions:
-            LeadershipPosition.objects.get_or_create(name=name, defaults={'sort_order': order})
-            self.stdout.write(f'  Position ready: {name}')
+        # 2. Create leadership positions safely
+        try:
+            from apps.leadership.models import LeadershipPosition
+            positions = [
+                ('chairperson',        1),
+                ('cell_leader',        2),
+                ('marketing_leader',   3),
+                ('hospitality_leader', 4),
+                ('evangelism_leader',  5),
+                ('prayer_leader',      6),
+                ('choir_leader',       7),
+            ]
+            for name, order in positions:
+                LeadershipPosition.objects.get_or_create(name=name, defaults={'sort_order': order})
+                self.stdout.write(f'  Position ready: {name}')
+        except Exception as e:
+            self.stdout.write(self.style.WARNING(f'Skipping positions: {e}'))
 
-        # 3. Create or reset admin user
+        # 3. Create admin user
         admin_role, _ = Role.objects.get_or_create(name=Role.ADMIN)
         if User.objects.filter(username='admin').exists():
             user = User.objects.get(username='admin')
@@ -39,7 +42,7 @@ class Command(BaseCommand):
             user.is_staff = True
             user.is_superuser = True
             user.save()
-            self.stdout.write(self.style.WARNING('Admin user already existed — password reset to 1234.'))
+            self.stdout.write(self.style.WARNING('Admin password reset to 1234.'))
         else:
             User.objects.create_superuser(
                 username='admin', password='1234',
@@ -47,6 +50,4 @@ class Command(BaseCommand):
                 first_name='Admin', last_name='User',
                 role=admin_role,
             )
-            self.stdout.write(self.style.SUCCESS('Admin user created: username=admin  password=1234'))
-
-        self.stdout.write(self.style.SUCCESS('\nSetup complete. Log in at /auth/login/'))
+            self.stdout.write(self.style.SUCCESS('Admin created: admin / 1234'))
