@@ -5,6 +5,25 @@ from django.contrib import messages
 from .forms import CustomLoginForm, AddPersonForm, EditPersonForm, ProfileUpdateForm
 from .models import CustomUser, Role
 from .decorators import role_required
+import datetime
+
+
+def _get_upcoming_birthdays():
+    today = datetime.date.today()
+    alerts = []
+    for person in CustomUser.objects.filter(is_active=True, birthday__isnull=False):
+        bd = person.birthday
+        try:
+            this_year_bd = bd.replace(year=today.year)
+        except ValueError:
+            continue
+        if this_year_bd < today:
+            this_year_bd = bd.replace(year=today.year + 1)
+        days_away = (this_year_bd - today).days
+        if 0 <= days_away <= 7:
+            alerts.append({'person': person, 'days_away': days_away})
+    alerts.sort(key=lambda x: x['days_away'])
+    return alerts
 
 
 def login_view(request):
@@ -26,8 +45,16 @@ def dashboard(request):
     from apps.cells.models import Cell, CellMeetingReport
     from apps.services.models import ServiceRecord
     from apps.notifications.models import Notification
+    from apps.notifications.birthday_alerts import send_birthday_notifications
 
     user = request.user
+
+    # Send birthday notifications
+    try:
+        send_birthday_notifications()
+    except Exception:
+        pass
+
     my_cells = (
         Cell.objects.filter(facilitator=user, is_active=True) |
         Cell.objects.filter(second_in_cmd=user, is_active=True)
@@ -39,6 +66,7 @@ def dashboard(request):
         'recent_service': ServiceRecord.objects.order_by('-date').first(),
         'unread_count': Notification.objects.filter(recipient=user, is_read=False).count(),
         'my_cells': my_cells,
+        'birthday_alerts': _get_upcoming_birthdays(),
         'recent_notifications': Notification.objects.filter(recipient=user).order_by('-created_at')[:5],
         'pending_reports': CellMeetingReport.objects.filter(
             cell__in=my_cells).order_by('-date')[:5] if my_cells else [],
