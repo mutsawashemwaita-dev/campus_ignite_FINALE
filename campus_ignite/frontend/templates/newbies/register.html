@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Register Newbie{% endblock %}
+{% block page_title %}Register New Student{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="mb-3">
+      <a href="{% url 'newbie_list' %}" class="text-muted small">
+        <i class="fas fa-arrow-left me-1"></i>Back to Newbies
+      </a>
+    </div>
+
+    <div class="ci-form-card">
+      <div class="text-center mb-4">
+        <div style="width:60px;height:60px;background:var(--ci-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;">
+          <i class="fas fa-user-plus fa-lg" style="color:var(--ci-primary);"></i>
+        </div>
+        <h5 class="fw-bold" style="color:var(--ci-primary);">Register a New Student</h5>
+        <p class="text-muted small">Part 1 students new to Campus Ignite</p>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-user me-1"></i>Personal Details</h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">First Name <span class="text-danger">*</span></label>
+              <input type="text" name="first_name" class="form-control"
+                     value="{{ post.first_name|default:'' }}"
+                     placeholder="First name" autofocus>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Surname <span class="text-danger">*</span></label>
+              <input type="text" name="last_name" class="form-control"
+                     value="{{ post.last_name|default:'' }}"
+                     placeholder="Last name / Surname">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+              <input type="text" name="phone" class="form-control"
+                     value="{{ post.phone|default:'' }}"
+                     placeholder="e.g. 0771234567">
+            </div>
+          </div>
+        </div>
+
+        <div class="ci-form-section mb-4">
+          <h6><i class="fas fa-graduation-cap me-1"></i>Academic Details</h6>
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label">Programme / Course <span class="text-danger">*</span></label>
+              <input type="text" name="program" class="form-control"
+                     value="{{ post.program|default:'' }}"
+                     placeholder="e.g. BSc Computer Science">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Year of Study</label>
+              <input type="text" name="year_of_study" class="form-control"
+                     value="{{ post.year_of_study|default:'Part 1' }}"
+                     placeholder="Part 1">
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">Notes <span class="text-muted">(optional)</span></label>
+          <textarea name="notes" class="form-control" rows="2"
+                    placeholder="Any additional notes...">{{ post.notes|default:'' }}</textarea>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci px-4">
+            <i class="fas fa-user-plus me-2"></i>Register Student
+          </button>
+          <a href="{% url 'newbie_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

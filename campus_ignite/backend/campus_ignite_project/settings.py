@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'apps.services',
     'apps.notifications',
     'apps.departments',
+    'apps.newbies',
 ]
 
 MIDDLEWARE = [

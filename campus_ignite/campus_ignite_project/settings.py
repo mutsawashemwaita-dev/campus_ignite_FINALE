@@ -23,8 +23,9 @@ INSTALLED_APPS = [
     'apps.cells',
     'apps.services',
     'apps.notifications',
+    'apps.departments',
+    'apps.newbies',
 ]
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

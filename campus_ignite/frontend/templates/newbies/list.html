@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Newbies{% endblock %}
+{% block page_title %}Newbies Registration{% endblock %}
+{% block content %}
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-2">
+    <div class="ci-stat py-2 px-3">
+      <div class="lbl">Total</div>
+      <div class="num" style="font-size:1.5rem;">{{ counts.total }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="ci-stat py-2 px-3" style="border-left-color:#6c757d;">
+      <div class="lbl">New</div>
+      <div class="num" style="font-size:1.5rem;color:#6c757d;">{{ counts.new }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="ci-stat py-2 px-3" style="border-left-color:#0dcaf0;">
+      <div class="lbl">Contacted</div>
+      <div class="num" style="font-size:1.5rem;color:#0dcaf0;">{{ counts.contacted }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="ci-stat py-2 px-3" style="border-left-color:#ffc107;">
+      <div class="lbl">Following Up</div>
+      <div class="num" style="font-size:1.5rem;color:#ffc107;">{{ counts.following }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="ci-stat py-2 px-3" style="border-left-color:#198754;">
+      <div class="lbl">Connected</div>
+      <div class="num" style="font-size:1.5rem;color:#198754;">{{ counts.connected }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2 d-flex align-items-center">
+    <a href="{% url 'newbie_register' %}" class="btn btn-ci w-100">
+      <i class="fas fa-plus me-1"></i>Register
+    </a>
+  </div>
+</div>
+
+<!-- Filter tabs -->
+<ul class="nav nav-pills mb-3">
+  <li class="nav-item">
+    <a class="nav-link {% if not status_filter %}active{% endif %}" href="{% url 'newbie_list' %}">All</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if status_filter == 'new' %}active{% endif %}" href="?status=new">New</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if status_filter == 'contacted' %}active{% endif %}" href="?status=contacted">Contacted</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if status_filter == 'following' %}active{% endif %}" href="?status=following">Following Up</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if status_filter == 'connected' %}active{% endif %}" href="?status=connected">Connected</a>
+  </li>
+</ul>
+
+<!-- Table -->
+<div class="ci-card card">
+  <div class="table-responsive">
+    <table class="table ci-table mb-0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Programme</th>
+          <th>Year</th>
+          <th>Status</th>
+          <th>Registered</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for n in newbies %}
+        <tr>
+          <td class="fw-semibold" style="color:var(--ci-primary);">{{ n.get_full_name }}</td>
+          <td>{{ n.phone }}</td>
+          <td>{{ n.program }}</td>
+          <td><span class="badge-role">{{ n.year_of_study }}</span></td>
+          <td>
+            <form method="post" action="{% url 'newbie_update_status' n.pk %}" class="d-inline">
+              {% csrf_token %}
+              <select name="status" onchange="this.form.submit()"
+                      class="form-select form-select-sm" style="width:auto;">
+                <option value="new"       {% if n.status == 'new'       %}selected{% endif %}>🆕 New</option>
+                <option value="contacted" {% if n.status == 'contacted' %}selected{% endif %}>📞 Contacted</option>
+                <option value="following" {% if n.status == 'following' %}selected{% endif %}>🔄 Following Up</option>
+                <option value="connected" {% if n.status == 'connected' %}selected{% endif %}>✅ Connected</option>
+              </select>
+            </form>
+          </td>
+          <td><small class="text-muted">{{ n.date_registered }}</small></td>
+          <td>
+            <a href="{% url 'newbie_delete' n.pk %}"
+               class="btn btn-sm btn-outline-danger"
+               data-confirm="Remove {{ n.get_full_name }}?">
+              <i class="fas fa-trash"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center text-muted py-5">
+            <i class="fas fa-user-graduate fa-3x mb-3 d-block" style="opacity:.3;"></i>
+            No newbies registered yet.
+            <a href="{% url 'newbie_register' %}">Register the first one.</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
