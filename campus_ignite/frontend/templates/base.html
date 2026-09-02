@@ -59,6 +59,9 @@
     </a>
 
     <div class="nav-section">Ministry</div>
+    <a href="{% url 'org_calendar' %}" class="nav-link {% if 'calendar' in request.path %}active{% endif %}">
+      <i class="fas fa-calendar-days"></i> Calendar
+    </a>
     <a href="{% url 'cell_list' %}" class="nav-link {% if 'cells' in request.path %}active{% endif %}">
       <i class="fas fa-people-group"></i> Cells
     </a>

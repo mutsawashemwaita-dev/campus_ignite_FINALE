@@ -2,7 +2,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .forms import CustomLoginForm, AddPersonForm, EditPersonForm, ProfileUpdateForm
+from .forms import CustomLoginForm, SignupForm, AddPersonForm, EditPersonForm, ProfileUpdateForm
 from .models import CustomUser, Role
 from .decorators import role_required
 import datetime
@@ -40,6 +40,20 @@ def login_view(request):
     return render(request, 'auth/login.html', {'form': form})
 
 
+def signup_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, f'Welcome, {user.get_full_name()}! Your account is linked to your department.')
+            return redirect('dashboard')
+    else:
+        form = SignupForm()
+    return render(request, 'auth/signup.html', {'form': form})
+
 @login_required
 def dashboard(request):
     from apps.cells.models import Cell, CellMeetingReport
@@ -60,12 +74,20 @@ def dashboard(request):
         Cell.objects.filter(second_in_cmd=user, is_active=True)
     ).distinct().select_related('cell_type')
 
+    from apps.departments.models import Department
+    my_departments = (
+        Department.objects.filter(leader=user, is_active=True) |
+        Department.objects.filter(second_in_cmd=user, is_active=True) |
+        Department.objects.filter(members__user=user, is_active=True)
+    ).distinct()
+
     context = {
         'total_cells': Cell.objects.filter(is_active=True).count(),
         'total_users': CustomUser.objects.filter(is_active=True).count(),
         'recent_service': ServiceRecord.objects.order_by('-date').first(),
         'unread_count': Notification.objects.filter(recipient=user, is_read=False).count(),
         'my_cells': my_cells,
+        'my_departments': my_departments,
         'birthday_alerts': _get_upcoming_birthdays(),
         'recent_notifications': Notification.objects.filter(recipient=user).order_by('-created_at')[:5],
         'pending_reports': CellMeetingReport.objects.filter(

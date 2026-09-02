@@ -16,6 +16,9 @@
     <a href="{% url 'dept_post_create' dept.pk %}" class="btn btn-sm btn-outline-secondary">
       <i class="fas fa-pen me-1"></i>New Post
     </a>
+        <a href="{% url 'department_event_create' dept.pk %}" class="btn btn-sm btn-outline-primary">
+      <i class="fas fa-calendar-plus me-1"></i>Add Event
+    </a>
     <a href="{% url 'print_department' dept.pk %}" class="btn btn-sm btn-outline-secondary" target="_blank">
       <i class="fas fa-print me-1"></i>Print
     </a>
@@ -99,6 +102,36 @@
         <i class="fas fa-bullhorn fa-2x mb-2 d-block" style="opacity:.3;"></i>
         No posts yet.<br>
         <a href="{% url 'dept_post_create' dept.pk %}" class="btn btn-sm btn-ci mt-2">Create First Post</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Upcoming Events -->
+<div class="row g-4 mt-1">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="ci-section-header mb-0"><i class="fas fa-calendar-alt me-2"></i>Upcoming Events</h6>
+      <a href="{% url 'department_event_create' dept.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-plus me-1"></i>Add Event</a>
+    </div>
+    {% if events %}
+      {% for e in events %}
+      <div class="ci-card card mb-2 p-3">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="fw-bold" style="color:var(--ci-primary);">{{ e.title }}</div>
+            <small class="text-muted"><i class="fas fa-calendar me-1"></i>{{ e.event_date }}{% if e.event_time %} at {{ e.event_time|time:"H:i" }}{% endif %}</small>
+            {% if e.description %}<p class="small text-muted mb-0 mt-1">{{ e.description }}</p>{% endif %}
+          </div>
+          <span class="badge-role">Upcoming</span>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center py-4 text-muted">
+        <i class="fas fa-calendar-alt fa-2x mb-2 d-block" style="opacity:.3;"></i>
+        No upcoming events.<br>
+        <a href="{% url 'department_event_create' dept.pk %}" class="btn btn-sm btn-ci mt-2">Add First Event</a>
       </div>
     {% endif %}
   </div>

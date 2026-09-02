@@ -46,6 +46,22 @@ class DepartmentMember(models.Model):
         return f"{self.user.get_full_name()} – {self.department.name}"
 
 
+class DepartmentEvent(models.Model):
+    department  = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='events')
+    title       = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    event_date  = models.DateField()
+    event_time  = models.TimeField(null=True, blank=True)
+    created_by  = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['event_date']
+
+    def __str__(self):
+        return f"{self.title} ({self.department.name} – {self.event_date})"
+
+
 class DepartmentPost(models.Model):
     department  = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='posts')
     title       = models.CharField(max_length=200)

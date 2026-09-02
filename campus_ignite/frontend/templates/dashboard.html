@@ -51,6 +51,31 @@
 <div class="row g-4">
   <!-- Left column -->
   <div class="col-lg-8">
+    {% if my_departments %}
+    <h6 class="ci-section-header"><i class="fas fa-layer-group me-2"></i>My Department{{ my_departments|length|pluralize }}</h6>
+    <div class="row g-3 mb-4">
+      {% for dept in my_departments %}
+      <div class="col-md-6">
+        <div class="ci-card card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h6 class="fw-bold mb-0" style="color:var(--ci-primary);">{{ dept.name }}</h6>
+              <span class="badge-role">{{ dept.get_dept_type_display }}</span>
+            </div>
+            <p class="text-muted small mb-3">
+              <i class="fas fa-users me-1"></i>{{ dept.members.count }} member{{ dept.members.count|pluralize }}
+            </p>
+            <div class="d-flex gap-2">
+              <a href="{% url 'department_detail' dept.pk %}" class="btn btn-sm btn-ci">Manage</a>
+              <a href="{% url 'department_event_create' dept.pk %}" class="btn btn-sm btn-outline-secondary">+ Event</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
     {% if my_cells %}
     <h6 class="ci-section-header"><i class="fas fa-people-group me-2"></i>My Cells</h6>
     <div class="row g-3 mb-4">

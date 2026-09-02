@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Calendar{% endblock %}
+{% block page_title %}Organization Calendar{% endblock %}
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <div class="d-flex flex-wrap gap-3 align-items-center">
+    {% for item in legend %}
+    <span class="small text-muted">
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:{{ item.color }};margin-right:5px;"></span>{{ item.label }}
+    </span>
+    {% endfor %}
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <a href="{% url 'print_calendar_year' %}?year={{ year }}" class="btn btn-sm btn-outline-secondary" target="_blank">
+      <i class="fas fa-print me-1"></i>Print
+    </a>
+    <a href="{% url 'pdf_calendar_year' %}?year={{ year }}" class="btn btn-sm btn-ci-gold" target="_blank">
+      <i class="fas fa-file-pdf me-1"></i>Save PDF
+    </a>
+  </div>
+</div>
+
+<div class="d-flex flex-wrap gap-3 mb-3">
+  <div class="form-check form-check-inline">
+    <input class="form-check-input filter-check" type="checkbox" value="cell" id="filterCell" checked>
+    <label class="form-check-label small" for="filterCell">Cells</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input filter-check" type="checkbox" value="department" id="filterDept" checked>
+    <label class="form-check-label small" for="filterDept">Departments</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input filter-check" type="checkbox" value="service" id="filterService" checked>
+    <label class="form-check-label small" for="filterService">Services</label>
+  </div>
+</div>
+
+<div class="ci-card card p-3">
+  <div id="orgCalendar"></div>
+</div>
+
+<div id="eventDetailModal" class="modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="eventDetailTitle"></h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted mb-1" id="eventDetailMeta"></p>
+        <p class="mb-0" id="eventDetailDesc"></p>
+      </div>
+      <div class="modal-footer">
+        <a href="#" id="eventDetailLink" class="btn btn-sm btn-ci" target="_self">Open</a>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const calendarEl = document.getElementById('orgCalendar');
+  const checks = document.querySelectorAll('.filter-check');
+
+  function activeTypes() {
+    return Array.from(checks).filter(c => c.checked).map(c => c.value);
+  }
+
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'multiMonthYear',
+    initialDate: '{{ year }}-01-01',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'multiMonthYear,dayGridMonth,listMonth'
+    },
+    height: 'auto',
+    events: function (info, successCallback, failureCallback) {
+      const params = new URLSearchParams({
+        start: info.startStr,
+        end: info.endStr,
+        types: activeTypes().join(',')
+      });
+      fetch("{% url 'org_calendar_events' %}?" + params.toString())
+        .then(r => r.json())
+        .then(data => successCallback(data))
+        .catch(err => failureCallback(err));
+    },
+    eventClick: function (info) {
+      info.jsEvent.preventDefault();
+      const props = info.event.extendedProps;
+      document.getElementById('eventDetailTitle').textContent = info.event.title;
+      document.getElementById('eventDetailMeta').textContent =
+        props.type + (props.time ? ' • ' + props.time : '') + ' • ' + info.event.startStr;
+      document.getElementById('eventDetailDesc').textContent = props.description || 'No further details.';
+      document.getElementById('eventDetailLink').href = props.url || '#';
+      const modal = new bootstrap.Modal(document.getElementById('eventDetailModal'));
+      modal.show();
+    }
+  });
+
+  calendar.render();
+
+  checks.forEach(c => c.addEventListener('change', () => calendar.refetchEvents()));
+});
+</script>
+{% endblock %}

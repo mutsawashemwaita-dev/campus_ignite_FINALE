@@ -1,8 +1,27 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from .models import Department, DepartmentMember, DepartmentPost
-from .forms import DepartmentForm, DepartmentMemberForm, DepartmentPostForm
+from .models import Department, DepartmentMember, DepartmentPost, DepartmentEvent
+from .forms import DepartmentForm, DepartmentMemberForm, DepartmentPostForm, DepartmentEventForm
+from apps.notifications.utils import create_notification
+
+
+def _can_manage_department(user, dept):
+    """Admins, pastors and the chairperson can manage any department.
+    Everyone else can only manage a department they lead, co-lead, or belong to."""
+    if user.is_admin or user.is_pastor or user.is_chairperson:
+        return True
+    if dept.leader_id == user.id or dept.second_in_cmd_id == user.id:
+        return True
+    return DepartmentMember.objects.filter(department=dept, user=user).exists()
+
+
+def _require_department_permission(request, dept):
+    """Returns True if allowed. If not, adds an error message (caller must redirect)."""
+    if _can_manage_department(request.user, dept):
+        return True
+    messages.error(request, "You don't have permission to manage this department.")
+    return False
 
 
 @login_required
@@ -19,11 +38,15 @@ def department_detail(request, pk):
     dept    = get_object_or_404(Department, pk=pk)
     members = dept.members.select_related('user').all()
     posts   = dept.posts.select_related('posted_by').all()
-    return render(request, 'departments/detail.html', {'dept': dept, 'members': members, 'posts': posts})
+    events  = dept.events.filter(event_date__gte=__import__('datetime').date.today()).order_by('event_date')
+    return render(request, 'departments/detail.html', {'dept': dept, 'members': members, 'posts': posts, 'events': events})
 
 
 @login_required
 def department_create(request):
+    if not (request.user.is_admin or request.user.is_pastor or request.user.is_chairperson):
+        messages.error(request, "Only admins, pastors, or the chairperson can create new departments.")
+        return redirect('department_list')
     if request.method == 'POST':
         form = DepartmentForm(request.POST)
         if form.is_valid():
@@ -38,6 +61,8 @@ def department_create(request):
 @login_required
 def department_edit(request, pk):
     dept = get_object_or_404(Department, pk=pk)
+    if not _require_department_permission(request, dept):
+        return redirect('department_detail', pk=pk)
     if request.method == 'POST':
         form = DepartmentForm(request.POST)
         if form.is_valid():
@@ -57,6 +82,8 @@ def department_edit(request, pk):
 @login_required
 def add_member(request, pk):
     dept = get_object_or_404(Department, pk=pk)
+    if not _require_department_permission(request, dept):
+        return redirect('department_detail', pk=pk)
     if request.method == 'POST':
         form = DepartmentMemberForm(request.POST)
         if form.is_valid():
@@ -79,6 +106,8 @@ def add_member(request, pk):
 @login_required
 def remove_member(request, pk, member_pk):
     dept   = get_object_or_404(Department, pk=pk)
+    if not _require_department_permission(request, dept):
+        return redirect('department_detail', pk=pk)
     member = get_object_or_404(DepartmentMember, pk=member_pk, department=dept)
     name   = member.user.get_full_name()
     member.delete()
@@ -89,6 +118,8 @@ def remove_member(request, pk, member_pk):
 @login_required
 def post_create(request, pk):
     dept = get_object_or_404(Department, pk=pk)
+    if not _require_department_permission(request, dept):
+        return redirect('department_detail', pk=pk)
     if request.method == 'POST':
         form = DepartmentPostForm(request.POST)
         if form.is_valid():
@@ -106,6 +137,8 @@ def post_create(request, pk):
 @login_required
 def post_delete(request, pk, post_pk):
     dept = get_object_or_404(Department, pk=pk)
+    if not _require_department_permission(request, dept):
+        return redirect('department_detail', pk=pk)
     post = get_object_or_404(DepartmentPost, pk=post_pk, department=dept)
     post.delete()
     messages.success(request, 'Post deleted.')
@@ -267,3 +300,51 @@ def birthday_list(request):
         'this_month_name':  today.strftime('%B'),
         'today':            today,
     })
+
+@login_required
+def department_event_create(request, pk):
+    dept = get_object_or_404(Department, pk=pk)
+    if not _require_department_permission(request, dept):
+        return redirect('department_detail', pk=pk)
+    if request.method == 'POST':
+        form = DepartmentEventForm(request.POST)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.department = dept
+            event.created_by = request.user
+            event.save()
+            _notify_dept_of_event(event)
+            messages.success(request, 'Event added to calendar. Department members have been notified.')
+            return redirect('department_detail', pk=dept.pk)
+    else:
+        form = DepartmentEventForm()
+    return render(request, 'departments/calendar_event_form.html', {'form': form, 'dept': dept})
+
+
+def _notify_dept_of_event(event):
+    """Notify the department leader, 2IC, and all members about a new department event."""
+    msg = f"New event: '{event.title}' on {event.event_date} for {event.department.name}."
+
+    notified_ids = set()
+
+    for user in [event.department.leader, event.department.second_in_cmd]:
+        if user and user.id not in notified_ids:
+            create_notification(
+                recipient=user,
+                title=f"New Department Event – {event.department.name}",
+                message=msg,
+                source_type='department_event',
+                source_id=event.pk,
+            )
+            notified_ids.add(user.id)
+
+    for membership in event.department.members.select_related('user').all():
+        if membership.user_id not in notified_ids:
+            create_notification(
+                recipient=membership.user,
+                title=f"Department Calendar – {event.department.name}",
+                message=msg,
+                source_type='department_event',
+                source_id=event.pk,
+            )
+            notified_ids.add(membership.user_id)

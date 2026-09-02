@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'apps.notifications',
     'apps.departments',
     'apps.newbies',
+    'apps.schedule',
 ]
 
 MIDDLEWARE = [

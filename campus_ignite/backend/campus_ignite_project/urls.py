@@ -24,6 +24,7 @@ urlpatterns = [
     path('notifications/', include('apps.notifications.urls')),
     path('departments/', include('apps.departments.urls')),
     path('newbies/', include('apps.newbies.urls')),
+    path('calendar/', include('apps.schedule.urls')),
     # Print (browser)
     path('print/cells/<int:pk>/reports/',        print_cell_reports,         name='print_cell_reports'),
     path('print/services/<int:pk>/',             print_service,              name='print_service'),

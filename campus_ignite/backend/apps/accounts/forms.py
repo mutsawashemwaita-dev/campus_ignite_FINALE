@@ -1,5 +1,6 @@
 from django import forms
 from .models import CustomUser, Role
+from apps.departments.models import Department, DepartmentMember
 import uuid
 
 
@@ -24,6 +25,77 @@ class CustomLoginForm(forms.Form):
 
     def get_user(self):
         return getattr(self, 'user', None)
+
+class SignupForm(forms.Form):
+    """Public self-registration. Every signup links the new account to exactly one
+    department as a regular member — it does NOT grant leadership permissions."""
+    first_name = forms.CharField(
+        label='First Name',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First name'})
+    )
+    last_name = forms.CharField(
+        label='Last Name',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last name'})
+    )
+    email = forms.EmailField(
+        label='Email Address', required=False,
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email address (optional)'})
+    )
+    phone = forms.CharField(
+        label='Phone Number', required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone number (optional)'})
+    )
+    department = forms.ModelChoiceField(
+        label='Department',
+        queryset=Department.objects.filter(is_active=True),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        help_text='You will only be able to manage this department.'
+    )
+    username = forms.CharField(
+        label='Username',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Choose a username'})
+    )
+    password = forms.CharField(
+        label='Password',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Choose a password'})
+    )
+    confirm_password = forms.CharField(
+        label='Confirm Password',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Repeat password'})
+    )
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username', '').strip()
+        if CustomUser.objects.filter(username=username).exists():
+            raise forms.ValidationError(f'Username "{username}" is already taken.')
+        return username
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password', '')
+        confirm  = cleaned_data.get('confirm_password', '')
+        if password and confirm and password != confirm:
+            raise forms.ValidationError('Passwords do not match.')
+        return cleaned_data
+
+    def save(self):
+        data = self.cleaned_data
+        leadership_role, _ = Role.objects.get_or_create(name=Role.LEADERSHIP)
+        user = CustomUser.objects.create_user(
+            username=data['username'],
+            password=data['password'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            email=data.get('email', ''),
+            phone=data.get('phone', ''),
+            role=leadership_role,
+        )
+        DepartmentMember.objects.get_or_create(
+            department=data['department'],
+            user=user,
+            defaults={'role_in_dept': 'Leader'},
+        )
+        return user
 
 
 class AddPersonForm(forms.Form):

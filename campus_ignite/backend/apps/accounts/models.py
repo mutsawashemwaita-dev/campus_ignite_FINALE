@@ -7,6 +7,7 @@ class Role(models.Model):
     CELL_LEADER = 'cell_leader'
     FACILITATOR = 'facilitator'
     LEADERSHIP  = 'leadership'
+    CHAIRPERSON = 'chairperson'
     ADMIN       = 'admin'
 
     ROLE_CHOICES = [
@@ -14,6 +15,7 @@ class Role(models.Model):
         (CELL_LEADER, 'Cell Leader'),
         (FACILITATOR, 'Cell Facilitator'),
         (LEADERSHIP,  'Leadership Member'),
+        (CHAIRPERSON, 'Chairperson'),
         (ADMIN,       'Administrator'),
     ]
 
@@ -55,6 +57,10 @@ class CustomUser(AbstractUser):
     @property
     def is_leadership(self):
         return self.has_role(Role.LEADERSHIP)
+
+    @property
+    def is_chairperson(self):
+        return self.has_role(Role.CHAIRPERSON)
 
     @property
     def is_admin(self):

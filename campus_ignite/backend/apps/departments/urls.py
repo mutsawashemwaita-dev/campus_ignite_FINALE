@@ -11,4 +11,5 @@ urlpatterns = [
     path('<int:pk>/members/<int:member_pk>/remove/', views.remove_member,   name='dept_remove_member'),
     path('<int:pk>/posts/add/',                     views.post_create,       name='dept_post_create'),
     path('<int:pk>/posts/<int:post_pk>/delete/',    views.post_delete,       name='dept_post_delete'),
+    path('<int:pk>/calendar/add/',                  views.department_event_create, name='department_event_create'),
 ]

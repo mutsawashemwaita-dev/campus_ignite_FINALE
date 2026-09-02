@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account – Campus Ignite</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="{% static 'css/campus_ignite.css' %}" rel="stylesheet">
+</head>
+<body>
+<div class="ci-login-bg d-flex align-items-center justify-content-center py-4">
+  <div class="ci-login-card card border-0 shadow-lg" style="max-width:460px;width:100%;">
+    <div style="background:var(--ci-primary);padding:2rem 1.5rem 1.5rem;text-align:center;">
+      <div style="margin:0 auto .75rem;text-align:center;">
+        <img src="{% static 'img/logo.png.jpeg' %}"
+             style="width:80px;height:80px;object-fit:contain;border-radius:50%;">
+      </div>
+      <h4 style="color:#fff;font-weight:700;margin:0;">Campus Ignite</h4>
+      <p style="color:rgba(255,255,255,.55);font-size:.8rem;margin:.25rem 0 0;">Department Leader Registration</p>
+    </div>
+    <div class="card-body p-4">
+      <p class="text-center text-muted mb-4" style="font-size:.9rem;">
+        Register as a leader of your department — you'll only be able to manage that one department.
+      </p>
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger py-2 small">
+          <i class="fas fa-exclamation-circle me-1"></i> {{ form.non_field_errors.0 }}
+        </div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">First Name</label>
+            {{ form.first_name }}
+            {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">Last Name</label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">Email</label>
+          {{ form.email }}
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">Phone</label>
+          {{ form.phone }}
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">
+            <i class="fas fa-layer-group me-1"></i>Department
+          </label>
+          {{ form.department }}
+          <small class="text-muted">{{ form.department.help_text }}</small>
+          {% if form.department.errors %}<div class="text-danger small mt-1">{{ form.department.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">Username</label>
+          {{ form.username }}
+          {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">Password</label>
+            {{ form.password }}
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">Confirm</label>
+            {{ form.confirm_password }}
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-ci w-100 fw-semibold py-2">
+          <i class="fas fa-user-plus me-2"></i>Create Account
+        </button>
+      </form>
+
+      <p class="text-center text-muted mt-3 mb-0" style="font-size:.85rem;">
+        Already have an account? <a href="{% url 'login' %}" style="color:var(--ci-primary);font-weight:600;">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

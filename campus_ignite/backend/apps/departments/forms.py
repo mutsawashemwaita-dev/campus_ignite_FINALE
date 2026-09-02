@@ -1,6 +1,16 @@
 from django import forms
-from .models import Department, DepartmentMember, DepartmentPost
+from .models import Department, DepartmentMember, DepartmentPost, DepartmentEvent
 
+class DepartmentEventForm(forms.ModelForm):
+    class Meta:
+        model  = DepartmentEvent
+        fields = ['title', 'description', 'event_date', 'event_time']
+        widgets = {
+            'title':       forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Event title'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Event description (optional)'}),
+            'event_date':  forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'event_time':  forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+        }
 
 class DepartmentForm(forms.Form):
     name = forms.CharField(
