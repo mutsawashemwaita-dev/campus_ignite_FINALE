@@ -108,6 +108,26 @@ document.addEventListener('DOMContentLoaded', function () {
   calendar.render();
 
   checks.forEach(c => c.addEventListener('change', () => calendar.refetchEvents()));
+
+  function scrollToToday(attempts) {
+    attempts = attempts || 0;
+    const todayCell = calendarEl.querySelector('.fc-day-today');
+    if (todayCell) {
+      todayCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (attempts < 10) {
+      setTimeout(() => scrollToToday(attempts + 1), 100);
+    }
+  }
+
+  const todayBtn = document.querySelector('.fc-today-button');
+  if (todayBtn) {
+    todayBtn.addEventListener('click', function () {
+      setTimeout(() => scrollToToday(), 100);
+    });
+  }
+
+  // Also scroll on initial load
+  scrollToToday();
 });
 </script>
 {% endblock %}
