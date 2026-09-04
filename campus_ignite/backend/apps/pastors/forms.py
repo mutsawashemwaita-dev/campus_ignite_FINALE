@@ -23,19 +23,10 @@ class PastorForm(forms.ModelForm):
         label='Title',
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Senior Pastor, Associate Pastor'}),
     )
-    bio = forms.CharField(
-        label='Biography',
-        required=False,
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Short biography...'}),
-    )
-    date_appointed = forms.DateField(
-        label='Date Appointed',
-        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-    )
 
     class Meta:
         model = Pastor
-        fields = ['title', 'bio', 'date_appointed']
+        fields = ['title']
 
     def clean_user_username(self):
         from apps.accounts.models import CustomUser
@@ -48,10 +39,13 @@ class PastorForm(forms.ModelForm):
         return None
 
     def save(self, commit=True):
+        import datetime
         instance = super().save(commit=False)
         user = self.cleaned_data.get('user_username')
         if user:
             instance.user = user
+        if not instance.date_appointed:
+            instance.date_appointed = datetime.date.today()
         if commit:
             instance.save()
         return instance
