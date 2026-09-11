@@ -2,6 +2,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.db.models import ProtectedError
 from .forms import CustomLoginForm, SignupForm, AddPersonForm, EditPersonForm, ProfileUpdateForm
 from .models import CustomUser, Role
 from .decorators import role_required
@@ -153,6 +154,35 @@ def user_activate(request, pk):
     user_obj.is_active = True
     user_obj.save()
     messages.success(request, f'"{user_obj.get_full_name()}" reactivated.')
+    return redirect('user_list')
+
+
+@login_required
+def user_delete(request, pk):
+    """Permanently delete a person — for wrongly added/duplicate entries.
+    Refuses (safely) if the person is still linked to other records
+    (e.g. leading a cell or department) instead of silently breaking data."""
+    user_obj = get_object_or_404(CustomUser, pk=pk)
+
+    if user_obj == request.user:
+        messages.error(request, 'You cannot delete your own account.')
+        return redirect('user_list')
+
+    if request.method == 'POST':
+        name = user_obj.get_full_name()
+        try:
+            user_obj.delete()
+            messages.success(request, f'"{name}" was permanently deleted.')
+        except ProtectedError:
+            messages.error(
+                request,
+                f'"{name}" can\'t be deleted because they\'re still linked to other '
+                f'records (e.g. leading a cell, department, or department membership). '
+                f'Reassign or remove those links first, or use Deactivate instead.'
+            )
+        return redirect('user_list')
+
+    # GET request just bounces back — no accidental deletes from a plain link
     return redirect('user_list')
 
 
