@@ -18,6 +18,14 @@ class LeadershipAssignmentForm(forms.Form):
             'placeholder': 'Type the username of the 2nd in command (optional)'
         }),
     )
+    second_in_cmd_2_username = forms.CharField(
+        label='Second 2IC Username',
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Type the username of a second 2IC (optional)'
+        }),
+    )
     year = forms.IntegerField(
         label='Year',
         widget=forms.NumberInput(attrs={
@@ -38,6 +46,8 @@ class LeadershipAssignmentForm(forms.Form):
             self.fields['leader_username'].initial = assignment.leader.username
             if assignment.second_in_cmd:
                 self.fields['second_in_cmd_username'].initial = assignment.second_in_cmd.username
+            if assignment.second_in_cmd_2:
+                self.fields['second_in_cmd_2_username'].initial = assignment.second_in_cmd_2.username
             self.fields['year'].initial = assignment.year
             self.fields['is_active'].initial = assignment.is_active
 
@@ -52,6 +62,17 @@ class LeadershipAssignmentForm(forms.Form):
     def clean_second_in_cmd_username(self):
         from apps.accounts.models import CustomUser
         username = self.cleaned_data.get('second_in_cmd_username')
+        if not username:
+            return None
+        try:
+            return CustomUser.objects.get(username=username)
+        except CustomUser.DoesNotExist:
+            raise forms.ValidationError(f'No user found with username "{username}".')
+
+    
+    def clean_second_in_cmd_2_username(self):
+        from apps.accounts.models import CustomUser
+        username = self.cleaned_data.get('second_in_cmd_2_username')
         if not username:
             return None
         try:

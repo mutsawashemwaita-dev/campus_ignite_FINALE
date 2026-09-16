@@ -38,12 +38,14 @@ def assign_leader(request, position_id):
         if form.is_valid():
             leader = form.cleaned_data['leader_username']
             second = form.cleaned_data['second_in_cmd_username']
+            second_2 = form.cleaned_data['second_in_cmd_2_username']
             is_active = form.cleaned_data['is_active']
             yr = form.cleaned_data['year']
 
             if assignment:
                 assignment.leader = leader
                 assignment.second_in_cmd = second
+                assignment.second_in_cmd_2 = second_2
                 assignment.is_active = is_active
                 assignment.year = yr
                 assignment.save()
@@ -52,6 +54,7 @@ def assign_leader(request, position_id):
                     position=position,
                     leader=leader,
                     second_in_cmd=second,
+                    second_in_cmd_2=second_2,
                     is_active=is_active,
                     year=yr,
                 )

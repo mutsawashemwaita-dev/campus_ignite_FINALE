@@ -11,6 +11,9 @@ class LeadershipPosition(models.Model):
         ('evangelism_leader', 'Evangelism Leader'),
         ('prayer_leader', 'Prayer Leader'),
         ('choir_leader', 'Choir Leader'),
+        ('ignite_her', 'Ignite Her'),
+        ('ignite_him', 'Ignite Him'),
+        ('administration', 'Administration'),
     ]
 
     name = models.CharField(max_length=50, choices=POSITIONS, unique=True)
@@ -28,6 +31,9 @@ class LeadershipAssignment(models.Model):
     leader = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='leader_of')
     second_in_cmd = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='second_in_cmd_of'
+    )
+    second_in_cmd_2 = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='second_in_cmd_2_of'
     )
     year = models.IntegerField()
     date_assigned = models.DateField(auto_now_add=True)

@@ -44,7 +44,7 @@
         </div>
         <!-- 2IC -->
         {% if a.second_in_cmd %}
-        <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
           <div class="avatar" style="width:34px;height:34px;font-size:.78rem;background:#f0f4ff;">
             {{ a.second_in_cmd.first_name|first|upper }}{{ a.second_in_cmd.last_name|first|upper }}
           </div>
@@ -53,7 +53,19 @@
             <small class="text-muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;">2IC</small>
           </div>
         </div>
-        {% else %}
+        {% endif %}
+        {% if a.second_in_cmd_2 %}
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="avatar" style="width:34px;height:34px;font-size:.78rem;background:#f0f4ff;">
+            {{ a.second_in_cmd_2.first_name|first|upper }}{{ a.second_in_cmd_2.last_name|first|upper }}
+          </div>
+          <div>
+            <div class="lead-2ic">{{ a.second_in_cmd_2.get_full_name }}</div>
+            <small class="text-muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;">2IC</small>
+          </div>
+        </div>
+        {% endif %}
+        {% if not a.second_in_cmd and not a.second_in_cmd_2 %}
         <p class="text-muted small mb-3"><i class="fas fa-user-slash me-1"></i>No 2IC assigned yet</p>
         {% endif %}
       {% else %}

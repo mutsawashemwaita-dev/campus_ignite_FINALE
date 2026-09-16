@@ -27,6 +27,13 @@
                    placeholder="Type the username of the 2IC">
             {% if form.second_in_cmd_username.errors %}<div class="text-danger small mt-1">{{ form.second_in_cmd_username.errors.0 }}</div>{% endif %}
           </div>
+          <div class="mb-3">
+            <label class="form-label">Second 2IC Username <span class="text-muted">(optional)</span></label>
+            <input type="text" name="second_in_cmd_2_username" class="form-control"
+                   value="{{ form.second_in_cmd_2_username.value|default:'' }}"
+                   placeholder="Type the username of a second 2IC">
+            {% if form.second_in_cmd_2_username.errors %}<div class="text-danger small mt-1">{{ form.second_in_cmd_2_username.errors.0 }}</div>{% endif %}
+          </div>
         </div>
         <div class="mb-3">
           <label class="form-label">Year</label>

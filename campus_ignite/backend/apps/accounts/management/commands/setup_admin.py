@@ -26,6 +26,9 @@ class Command(BaseCommand):
                 ('evangelism_leader',  5),
                 ('prayer_leader',      6),
                 ('choir_leader',       7),
+                ('ignite_her',         8),
+                ('ignite_him',         9),
+                ('administration',     10),
             ]
             for name, order in positions:
                 LeadershipPosition.objects.get_or_create(name=name, defaults={'sort_order': order})
