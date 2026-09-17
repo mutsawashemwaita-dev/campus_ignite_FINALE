@@ -27,6 +27,7 @@ class Role(models.Model):
 
 class CustomUser(AbstractUser):
     role     = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
+    is_alumni = models.BooleanField(default=False)
     photo    = models.ImageField(upload_to='users/', null=True, blank=True)
     phone    = models.CharField(max_length=20, blank=True)
     bio      = models.TextField(blank=True)

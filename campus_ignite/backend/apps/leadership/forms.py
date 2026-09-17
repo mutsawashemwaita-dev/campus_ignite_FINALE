@@ -79,3 +79,23 @@ class LeadershipAssignmentForm(forms.Form):
             return CustomUser.objects.get(username=username)
         except CustomUser.DoesNotExist:
             raise forms.ValidationError(f'No user found with username "{username}".')
+
+
+
+
+class StudentAnchorForm(forms.Form):
+    username = forms.CharField(
+        label='Username',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Type the username of the person to add as a Student Anchor'
+        }),
+    )
+
+    def clean_username(self):
+        from apps.accounts.models import CustomUser
+        username = self.cleaned_data.get('username')
+        try:
+            return CustomUser.objects.get(username=username)
+        except CustomUser.DoesNotExist:
+            raise forms.ValidationError(f'No user found with username "{username}".')

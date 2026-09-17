@@ -202,3 +202,9 @@ def profile(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+
+@login_required
+def alumni_list(request):
+    alumni = CustomUser.objects.filter(is_alumni=True, is_active=True).order_by('first_name', 'last_name')
+    return render(request, 'accounts/alumni_list.html', {'alumni': alumni})

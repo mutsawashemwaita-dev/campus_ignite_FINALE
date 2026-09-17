@@ -45,3 +45,16 @@ class LeadershipAssignment(models.Model):
 
     def __str__(self):
         return f"{self.position} — {self.leader.get_full_name()} ({self.year})"
+
+
+
+class StudentAnchor(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='anchor_roles')
+    date_assigned = models.DateField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-is_active', 'user__first_name']
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} (Student Anchor)"

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Alumni{% endblock %}
+{% block page_title %}Campus Ignite Alumni{% endblock %}
+{% block content %}
+
+<p class="text-muted mb-4">Former members of Campus Ignite who have graduated but continue to serve in or have moved on from campus ignite.</p>
+
+<div class="ci-card card">
+  {% if alumni %}
+    <ul class="list-group list-group-flush">
+      {% for person in alumni %}
+      <li class="list-group-item d-flex align-items-center gap-2 py-2">
+        <div class="avatar" style="width:32px;height:32px;font-size:.75rem;">
+          {{ person.first_name|first|upper }}{{ person.last_name|first|upper }}
+        </div>
+        <span class="fw-semibold" style="color:var(--ci-primary);">{{ person.get_full_name }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="p-4 text-center text-muted">
+      <i class="fas fa-user-graduate fa-2x mb-2 d-block" style="opacity:.3;"></i>
+      No alumni recorded yet.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

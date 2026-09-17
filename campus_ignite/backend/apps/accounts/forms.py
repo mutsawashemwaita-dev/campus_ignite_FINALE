@@ -136,9 +136,17 @@ class AddPersonForm(forms.Form):
         label='Role', required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'pastor / cell_leader / facilitator / leadership / admin'
+            'placeholder': 'pastor / cell_leader / facilitator / leadership / admin / chairperson'
         }),
         help_text='Leave blank for regular members'
+    )
+    is_alumni = forms.BooleanField(
+        label='Mark as Alumni', required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+    )
+    is_student_anchor = forms.BooleanField(
+        label='Mark as Student Anchor', required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
     )
     password = forms.CharField(
         label='Password', required=False,
@@ -159,7 +167,7 @@ class AddPersonForm(forms.Form):
         role_name = self.cleaned_data.get('role_name', '').strip().lower()
         if not role_name:
             return ''
-        valid_roles = [Role.ADMIN, Role.PASTOR, Role.CELL_LEADER, Role.FACILITATOR, Role.LEADERSHIP]
+        valid_roles = [Role.ADMIN, Role.PASTOR, Role.CELL_LEADER, Role.FACILITATOR, Role.LEADERSHIP, Role.CHAIRPERSON]
         if role_name not in valid_roles:
             raise forms.ValidationError(f'Invalid role. Choose from: {", ".join(valid_roles)}')
         return role_name
@@ -215,6 +223,15 @@ class AddPersonForm(forms.Form):
             )
             user.set_unusable_password()
             user.save()
+
+        if data.get('is_alumni'):
+            user.is_alumni = True
+            user.save()
+
+        if data.get('is_student_anchor'):
+            from apps.leadership.models import StudentAnchor
+            StudentAnchor.objects.get_or_create(user=user, defaults={'is_active': True})
+
         return user
 
 
@@ -230,28 +247,38 @@ class EditPersonForm(forms.ModelForm):
         label='New Password', required=False,
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Leave blank to keep current'})
     )
+    is_student_anchor = forms.BooleanField(
+        label='Mark as Student Anchor', required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+    )
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'phone', 'birthday']
+        fields = ['first_name', 'last_name', 'email', 'phone', 'birthday', 'is_alumni']
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name':  forms.TextInput(attrs={'class': 'form-control'}),
             'email':      forms.EmailInput(attrs={'class': 'form-control'}),
             'phone':      forms.TextInput(attrs={'class': 'form-control'}),
             'birthday':   forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'is_alumni':  forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.role:
             self.fields['role_name'].initial = self.instance.role.name
+        if self.instance and self.instance.pk:
+            from apps.leadership.models import StudentAnchor
+            self.fields['is_student_anchor'].initial = StudentAnchor.objects.filter(
+                user=self.instance, is_active=True
+            ).exists()
 
     def clean_role_name(self):
         role_name = self.cleaned_data.get('role_name', '').strip().lower()
         if not role_name:
             return ''
-        valid_roles = [Role.ADMIN, Role.PASTOR, Role.CELL_LEADER, Role.FACILITATOR, Role.LEADERSHIP]
+        valid_roles = [Role.ADMIN, Role.PASTOR, Role.CELL_LEADER, Role.FACILITATOR, Role.LEADERSHIP, Role.CHAIRPERSON]
         if role_name not in valid_roles:
             raise forms.ValidationError(f'Choose from: {", ".join(valid_roles)}')
         return role_name
@@ -269,6 +296,14 @@ class EditPersonForm(forms.ModelForm):
             user.set_password(new_pw)
         if commit:
             user.save()
+
+            from apps.leadership.models import StudentAnchor
+            wants_anchor = self.cleaned_data.get('is_student_anchor')
+            existing = StudentAnchor.objects.filter(user=user, is_active=True).first()
+            if wants_anchor and not existing:
+                StudentAnchor.objects.get_or_create(user=user, defaults={'is_active': True})
+            elif not wants_anchor and existing:
+                existing.delete()
         return user
 
 

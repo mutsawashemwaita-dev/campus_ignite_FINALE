@@ -3,8 +3,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from datetime import date
 from apps.accounts.decorators import role_required
-from .models import LeadershipPosition, LeadershipAssignment
-from .forms import LeadershipAssignmentForm
+from .models import LeadershipPosition, LeadershipAssignment, StudentAnchor
+from .forms import LeadershipAssignmentForm, StudentAnchorForm
 
 
 @login_required
@@ -66,3 +66,37 @@ def assign_leader(request, position_id):
     return render(request, 'leadership/assign_form.html', {
         'form': form, 'position': position
     })
+
+
+@login_required
+def student_anchor_list(request):
+    anchors = StudentAnchor.objects.filter(is_active=True).select_related('user')
+    return render(request, 'leadership/anchor_list.html', {'anchors': anchors})
+
+
+@login_required
+@role_required('admin', 'pastor')
+def student_anchor_add(request):
+    if request.method == 'POST':
+        form = StudentAnchorForm(request.POST)
+        if form.is_valid():
+            user = form.cleaned_data['username']
+            anchor, created = StudentAnchor.objects.get_or_create(user=user, defaults={'is_active': True})
+            if not created:
+                anchor.is_active = True
+                anchor.save()
+            messages.success(request, f'{user.get_full_name()} added as a Student Anchor.')
+            return redirect('student_anchor_list')
+    else:
+        form = StudentAnchorForm()
+    return render(request, 'leadership/anchor_form.html', {'form': form})
+
+
+@login_required
+@role_required('admin', 'pastor')
+def student_anchor_remove(request, pk):
+    anchor = get_object_or_404(StudentAnchor, pk=pk)
+    name = anchor.user.get_full_name()
+    anchor.delete()
+    messages.success(request, f'{name} removed from Student Anchors.')
+    return redirect('student_anchor_list')

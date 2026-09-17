@@ -54,8 +54,14 @@
     <a href="{% url 'pastor_list' %}" class="nav-link {% if 'pastors' in request.path %}active{% endif %}">
       <i class="fas fa-cross"></i> Pastoral Team
     </a>
-    <a href="{% url 'leadership_directory' %}" class="nav-link {% if 'leadership' in request.path %}active{% endif %}">
+    <a href="{% url 'leadership_directory' %}" class="nav-link {% if request.path == '/leadership/' or 'assign' in request.path %}active{% endif %}">
       <i class="fas fa-users-cog"></i> Leadership
+    </a>
+    <a href="{% url 'student_anchor_list' %}" class="nav-link {% if 'anchors' in request.path %}active{% endif %}">
+      <i class="fas fa-anchor"></i> Student Anchors
+    </a>
+    <a href="{% url 'alumni_list' %}" class="nav-link {% if 'alumni' in request.path %}active{% endif %}">
+      <i class="fas fa-user-graduate"></i> Alumni
     </a>
 
     <div class="nav-section">Ministry</div>

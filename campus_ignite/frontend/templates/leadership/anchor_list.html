@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Student Anchors{% endblock %}
+{% block page_title %}Student Anchors{% endblock %}
+{% block content %}
+
+<div class="alert mb-4" style="background:var(--ci-light);border:none;border-radius:10px;">
+  <i class="fas fa-anchor me-2" style="color:var(--ci-primary);"></i>
+  Student Anchors provide mentorship, guidance, stability, and additional capacity — preserving ministry knowledge and continuity through student leadership transitions.
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h6 class="ci-section-header mb-0">Current Anchors ({{ anchors.count }})</h6>
+  {% if user.is_admin or user.is_pastor %}
+  <a href="{% url 'student_anchor_add' %}" class="btn btn-sm btn-ci"><i class="fas fa-plus me-1"></i>Add Anchor</a>
+  {% endif %}
+</div>
+
+<div class="row g-3">
+  {% for anchor in anchors %}
+  <div class="col-md-6 col-lg-4">
+    <div class="ci-card card p-3">
+      <div class="d-flex align-items-center gap-2">
+        <div class="avatar">{{ anchor.user.first_name|first|upper }}{{ anchor.user.last_name|first|upper }}</div>
+        <div class="flex-grow-1">
+          <div class="fw-semibold" style="color:var(--ci-primary);">{{ anchor.user.get_full_name }}</div>
+          <small class="text-muted">Since {{ anchor.date_assigned|date:"M Y" }}</small>
+        </div>
+        {% if user.is_admin or user.is_pastor %}
+        <a href="{% url 'student_anchor_remove' anchor.pk %}" class="btn btn-sm btn-outline-danger"
+           data-confirm="Remove {{ anchor.user.get_full_name }} as a Student Anchor?"><i class="fas fa-times"></i></a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12 text-center text-muted py-4">
+    <i class="fas fa-anchor fa-2x mb-2 d-block" style="opacity:.3;"></i>
+    No Student Anchors assigned yet.
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
