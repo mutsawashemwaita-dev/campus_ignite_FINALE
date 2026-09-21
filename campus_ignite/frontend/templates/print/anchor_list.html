@@ -1,0 +1,17 @@
+{% extends 'print/base_print.html' %}
+{% block print_title %}Student Anchors{% endblock %}
+{% block print_heading %}Student Anchors{% endblock %}
+{% block print_content %}
+<div class="print-meta">
+  <span><strong>Total Anchors:</strong> {{ total }}</span>
+</div>
+<table>
+  <thead><tr><th>#</th><th>Full Name</th><th>Since</th></tr></thead>
+  <tbody>
+    {% for a in anchors %}
+    <tr><td>{{ forloop.counter }}</td><td>{{ a.user.get_full_name }}</td><td>{{ a.date_assigned|date:"d M Y" }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% if total == 0 %}<p class="text-muted">No Student Anchors assigned yet.</p>{% endif %}
+{% endblock %}

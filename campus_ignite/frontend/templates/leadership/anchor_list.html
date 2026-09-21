@@ -8,11 +8,19 @@
   Student Anchors provide mentorship, guidance, stability, and additional capacity — preserving ministry knowledge and continuity through student leadership transitions.
 </div>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
   <h6 class="ci-section-header mb-0">Current Anchors ({{ anchors.count }})</h6>
-  {% if user.is_admin or user.is_pastor %}
-  <a href="{% url 'student_anchor_add' %}" class="btn btn-sm btn-ci"><i class="fas fa-plus me-1"></i>Add Anchor</a>
-  {% endif %}
+  <div class="d-flex gap-2">
+    <a href="{% url 'print_anchor_list' %}" class="btn btn-sm btn-outline-secondary" target="_blank">
+      <i class="fas fa-print me-1"></i>Print
+    </a>
+    <a href="{% url 'pdf_anchor_list' %}" class="btn btn-sm btn-ci-gold" target="_blank">
+      <i class="fas fa-file-pdf me-1"></i>Save PDF
+    </a>
+    {% if user.is_admin or user.is_pastor %}
+    <a href="{% url 'student_anchor_add' %}" class="btn btn-sm btn-ci"><i class="fas fa-plus me-1"></i>Add Anchor</a>
+    {% endif %}
+  </div>
 </div>
 
 <div class="row g-3">

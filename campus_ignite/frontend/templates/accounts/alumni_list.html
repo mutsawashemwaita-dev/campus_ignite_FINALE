@@ -3,8 +3,17 @@
 {% block page_title %}Campus Ignite Alumni{% endblock %}
 {% block content %}
 
-<p class="text-muted mb-4">Former members of Campus Ignite who have graduated but continue to serve in or have moved on from campus ignite.</p>
-
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+  <p class="text-muted mb-0">Former members of Campus Ignite who have moved on from campus life.</p>
+  <div class="d-flex gap-2">
+    <a href="{% url 'print_alumni_list' %}" class="btn btn-sm btn-outline-secondary" target="_blank">
+      <i class="fas fa-print me-1"></i>Print
+    </a>
+    <a href="{% url 'pdf_alumni_list' %}" class="btn btn-sm btn-ci-gold" target="_blank">
+      <i class="fas fa-file-pdf me-1"></i>Save PDF
+    </a>
+  </div>
+</div>
 <div class="ci-card card">
   {% if alumni %}
     <ul class="list-group list-group-flush">
