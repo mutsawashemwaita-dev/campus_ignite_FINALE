@@ -16,6 +16,7 @@ FRONTEND_DIR = BASE_DIR.parent / 'frontend'
 SECRET_KEY = config('SECRET_KEY', default='campus-ignite-secret-key-change-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ['https://campus-ignite-finale.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
