@@ -1,4 +1,4 @@
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -191,8 +191,12 @@ def profile(request):
     if request.method == 'POST':
         form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Profile updated.')
+            user = form.save()
+            if form.cleaned_data.get('new_password'):
+                update_session_auth_hash(request, user)
+                messages.success(request, 'Profile updated and password changed.')
+            else:
+                messages.success(request, 'Profile updated.')
             return redirect('profile')
     else:
         form = ProfileUpdateForm(instance=request.user)

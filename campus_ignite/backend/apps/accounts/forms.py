@@ -308,10 +308,21 @@ class EditPersonForm(forms.ModelForm):
 
 
 class ProfileUpdateForm(forms.ModelForm):
+    new_password = forms.CharField(
+        label='New Password', required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Leave blank to keep current password'}),
+        help_text='Leave blank if you don\'t want to change your password'
+    )
+    confirm_password = forms.CharField(
+        label='Confirm New Password', required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Repeat new password'})
+    )
+
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'phone', 'birthday', 'bio', 'photo']
+        fields = ['username', 'first_name', 'last_name', 'email', 'phone', 'birthday', 'bio', 'photo']
         widgets = {
+            'username':   forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First name'}),
             'last_name':  forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last name'}),
             'email':      forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email address'}),
@@ -320,3 +331,21 @@ class ProfileUpdateForm(forms.ModelForm):
             'bio':        forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'photo':      forms.FileInput(attrs={'class': 'form-control'}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get('new_password')
+        confirm_password = cleaned_data.get('confirm_password')
+        if new_password or confirm_password:
+            if new_password != confirm_password:
+                raise forms.ValidationError('New passwords do not match.')
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        new_password = self.cleaned_data.get('new_password')
+        if new_password:
+            user.set_password(new_password)
+        if commit:
+            user.save()
+        return user
