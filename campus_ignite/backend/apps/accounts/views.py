@@ -99,8 +99,10 @@ def dashboard(request):
 
 @login_required
 def user_list(request):
-    users = CustomUser.objects.select_related('role').order_by('first_name', 'last_name')
-    return render(request, 'accounts/user_list.html', {'users': users})
+    all_people = CustomUser.objects.select_related('role').order_by('first_name', 'last_name')
+    users = all_people.exclude(password__startswith='!')
+    members = all_people.filter(password__startswith='!')
+    return render(request, 'accounts/user_list.html', {'users': users, 'members': members})
 
 
 @login_required

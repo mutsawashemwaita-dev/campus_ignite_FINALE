@@ -80,7 +80,7 @@
     <div class="ci-card card">
       <div class="table-responsive">
         <table class="table ci-table mb-0">
-          <thead><tr><th>Name</th><th>Birthday</th><th>Phone</th><th>Email</th><th>Notes</th><th>Actions</th></tr></thead>
+                      <thead><tr><th>Name</th><th>Birthday</th><th>Phone</th><th>Email</th><th>Bio</th><th>Actions</th></tr></thead>
           <tbody>
             {% for m in members %}
             <tr>
@@ -88,12 +88,15 @@
               <td>{% if m.birthday %}<i class="fas fa-birthday-cake me-1" style="color:var(--ci-accent);"></i>{{ m.birthday|date:"d M" }}{% else %}—{% endif %}</td>
               <td>{{ m.phone|default:"—" }}</td>
               <td>{{ m.email|default:"—" }}</td>
-              <td>{{ m.notes|truncatewords:8|default:"—" }}</td>
+              <td>{{ m.bio|truncatewords:8|default:"—" }}</td>
               <td>
                 <div class="d-flex gap-1">
-                  <a href="{% url 'member_edit' m.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
-                  <a href="{% url 'member_delete' m.pk %}" class="btn btn-sm btn-outline-danger"
-                     data-confirm="Remove {{ m.get_full_name }}?"><i class="fas fa-trash"></i></a>
+                  <a href="{% url 'user_edit' m.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                  <form method="post" action="{% url 'user_delete' m.pk %}" class="d-inline"
+                        onsubmit="return confirm('Permanently delete {{ m.get_full_name }}? This cannot be undone.');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                  </form>
                 </div>
               </td>
             </tr>
