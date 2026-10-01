@@ -89,8 +89,8 @@ class DepartmentForm(forms.Form):
 
 class DepartmentMemberForm(forms.Form):
     member_username = forms.CharField(
-        label='Member Username',
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Type the username of the person to add'})
+        label='Member Username or Full Name',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. johndoe or John Doe'})
     )
     role_in_dept = forms.CharField(
         label='Role in Department',
@@ -100,11 +100,23 @@ class DepartmentMemberForm(forms.Form):
 
     def clean_member_username(self):
         from apps.accounts.models import CustomUser
-        username = self.cleaned_data.get('member_username', '').strip()
+        value = self.cleaned_data.get('member_username', '').strip()
+
+        # Try an exact username match first
         try:
-            return CustomUser.objects.get(username=username)
+            return CustomUser.objects.get(username=value)
         except CustomUser.DoesNotExist:
-            raise forms.ValidationError(f'No user found with username "{username}".')
+            pass
+
+        # Fall back to matching by full name (handles non-login members)
+        matches = [u for u in CustomUser.objects.all() if u.get_full_name().strip().lower() == value.lower()]
+        if len(matches) == 1:
+            return matches[0]
+        elif len(matches) > 1:
+            raise forms.ValidationError(
+                f'Multiple people are named "{value}". Please use their username instead to be specific.'
+            )
+        raise forms.ValidationError(f'No person found with username or name "{value}".')
 
 
 class DepartmentPostForm(forms.ModelForm):

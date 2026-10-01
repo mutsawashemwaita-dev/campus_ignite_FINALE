@@ -9,10 +9,12 @@
       <form method="post">
         {% csrf_token %}
         <div class="mb-3">
-          <label class="form-label">Member Username <span class="text-danger">*</span></label>
-          <input type="text" name="member_username" class="form-control" placeholder="Type the person's username">
-          {% if form.member_username.errors %}<div class="text-danger small">{{ form.member_username.errors.0 }}</div>{% endif %}
+          <label class="form-label">Member Username or Full Name <span class="text-danger">*</span></label>
+          <input type="text" name="member_username" class="form-control" placeholder="e.g. johndoe or Carlos Sagowa">
+          <small class="text-muted">Use their username if they have a login, or their full name if they don't.</small>
+          {% if form.member_username.errors %}<div class="text-danger small mt-1">{{ form.member_username.errors.0 }}</div>{% endif %}
         </div>
+      
         <div class="mb-4">
           <label class="form-label">Role in Department</label>
           <input type="text" name="role_in_dept" class="form-control" placeholder="e.g. Soprano, Sound Engineer, Usher">
