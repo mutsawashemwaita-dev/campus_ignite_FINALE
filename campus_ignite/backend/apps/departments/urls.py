@@ -12,4 +12,6 @@ urlpatterns = [
     path('<int:pk>/posts/add/',                     views.post_create,       name='dept_post_create'),
     path('<int:pk>/posts/<int:post_pk>/delete/',    views.post_delete,       name='dept_post_delete'),
     path('<int:pk>/calendar/add/',                  views.department_event_create, name='department_event_create'),
+    path('members/new/',                            views.create_new_member, name='create_new_member'),
+    path('<int:pk>/members/new/',                   views.create_new_member, name='dept_create_member'),
 ]

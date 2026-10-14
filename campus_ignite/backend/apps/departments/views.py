@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from .models import Department, DepartmentMember, DepartmentPost, DepartmentEvent
-from .forms import DepartmentForm, DepartmentMemberForm, DepartmentPostForm, DepartmentEventForm
+from .forms import DepartmentForm, DepartmentMemberForm, DepartmentPostForm, DepartmentEventForm, DepartmentNewMemberForm
 from apps.notifications.utils import create_notification
 
 
@@ -348,3 +348,30 @@ def _notify_dept_of_event(event):
                 source_id=event.pk,
             )
             notified_ids.add(membership.user_id)
+
+
+
+@login_required
+@login_required
+def create_new_member(request, pk=None):
+    from .forms import manageable_departments
+    user = request.user
+    privileged = user.is_admin or user.is_pastor or user.is_chairperson
+    if not privileged and not manageable_departments(user).exists():
+        messages.error(request, "Only leaders can add new members.")
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        form = DepartmentNewMemberForm(request.POST, user=user)
+        if form.is_valid():
+            person = form.save()
+            dept = form.cleaned_data.get('department')
+            if dept:
+                messages.success(request, f'{person.get_full_name()} was created and added to {dept.name}.')
+                return redirect('department_detail', pk=dept.pk)
+            messages.success(request, f'{person.get_full_name()} was added to the system.')
+            return redirect('create_new_member')
+    else:
+        initial = {'department': pk} if pk else {}
+        form = DepartmentNewMemberForm(user=user, initial=initial)
+    return render(request, 'departments/new_member_form.html', {'form': form})

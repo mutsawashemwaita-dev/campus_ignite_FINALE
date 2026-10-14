@@ -68,6 +68,7 @@
             <div class="d-flex gap-2">
               <a href="{% url 'department_detail' dept.pk %}" class="btn btn-sm btn-ci">Manage</a>
               <a href="{% url 'department_event_create' dept.pk %}" class="btn btn-sm btn-outline-secondary">+ Event</a>
+              <a href="{% url 'dept_create_member' dept.pk %}" class="btn btn-sm btn-outline-secondary">+ New Member</a>
             </div>
           </div>
         </div>

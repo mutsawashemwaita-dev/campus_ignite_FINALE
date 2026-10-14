@@ -110,6 +110,24 @@ def _collect_events(start=None, end=None, types=None):
     return events
 
 
+def public_calendar_view(request):
+    """Read-only, no-login calendar anyone can open via a shared link."""
+    year = request.GET.get('year')
+    try:
+        year = int(year)
+    except (TypeError, ValueError):
+        year = datetime.date.today().year
+
+    return render(request, 'schedule/public_calendar.html', {
+        'year': year,
+        'legend': [
+            {'label': EVENT_LABELS['cell'], 'color': EVENT_COLORS['cell']},
+            {'label': EVENT_LABELS['department'], 'color': EVENT_COLORS['department']},
+            {'label': EVENT_LABELS['service'], 'color': EVENT_COLORS['service']},
+        ],
+    })
+
+
 @login_required
 def calendar_view(request):
     year = request.GET.get('year')
@@ -126,6 +144,18 @@ def calendar_view(request):
             {'label': EVENT_LABELS['service'], 'color': EVENT_COLORS['service']},
         ],
     })
+
+
+def public_calendar_events_json(request):
+    """Same data as the authenticated feed — event titles/dates/descriptions
+    aren't sensitive, so this is intentionally public."""
+    start = _parse_date(request.GET.get('start'))
+    end = _parse_date(request.GET.get('end'))
+    types_param = request.GET.get('types')
+    types = [t.strip() for t in types_param.split(',') if t.strip()] if types_param else None
+
+    events = _collect_events(start=start, end=end, types=types)
+    return JsonResponse(events, safe=False)
 
 
 @login_required
