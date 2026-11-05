@@ -67,6 +67,32 @@ def department_edit(request, pk):
         form = DepartmentForm(request.POST)
         if form.is_valid():
             form.save(instance=dept)
+
+            # Sync matching LeadershipAssignment if this department maps to an annual position
+            rev_map = {
+                'choir': 'choir_leader',
+                'marketing': 'marketing_leader',
+                'hospitality': 'hospitality_leader',
+                'evangelism': 'evangelism_leader',
+                'prayer': 'prayer_leader',
+            }
+            pos_name = rev_map.get(dept.dept_type)
+            if pos_name and dept.leader:
+                from apps.leadership.models import LeadershipPosition, LeadershipAssignment
+                from datetime import date
+                pos = LeadershipPosition.objects.filter(name=pos_name).first()
+                if pos:
+                    LeadershipAssignment.objects.update_or_create(
+                        position=pos,
+                        year=date.today().year,
+                        defaults={
+                            'leader': dept.leader,
+                            'second_in_cmd': dept.second_in_cmd,
+                            'second_in_cmd_2': dept.second_in_cmd_2,
+                            'is_active': dept.is_active,
+                        }
+                    )
+
             messages.success(request, f'"{dept.name}" updated.')
             return redirect('department_detail', pk=pk)
     else:
@@ -75,6 +101,7 @@ def department_edit(request, pk):
             'description': dept.description,
             'leader_username': dept.leader.username if dept.leader else '',
             'second_in_cmd_username': dept.second_in_cmd.username if dept.second_in_cmd else '',
+            'second_in_cmd_2_username': dept.second_in_cmd_2.username if dept.second_in_cmd_2 else '',
         })
     return render(request, 'departments/form.html', {'form': form, 'title': f'Edit: {dept.name}', 'dept': dept})
 
@@ -145,118 +172,12 @@ def post_delete(request, pk, post_pk):
     return redirect('department_detail', pk=pk)
 
 
-import datetime
-
-@login_required
-def birthday_list(request):
-    """
-    Show all members with birthdays, grouped by month.
-    Accessible from the Hospitality department.
-    """
-    from apps.accounts.models import Member
-    from apps.cells.models import CellMember
-
-    month_filter = request.GET.get('month', '')
-    members_qs = Member.objects.filter(is_active=True, birthday__isnull=False).order_by('birthday__month', 'birthday__day')
-
-    if month_filter:
-        members_qs = members_qs.filter(birthday__month=int(month_filter))
-
-    # Group by month
-    grouped = {}
-    MONTHS = ['January','February','March','April','May','June',
-              'July','August','September','October','November','December']
-    for m in members_qs:
-        month_name = MONTHS[m.birthday.month - 1]
-        grouped.setdefault(month_name, []).append(m)
-
-    # This month's birthdays
-    today = datetime.date.today()
-    this_month = Member.objects.filter(
-        is_active=True, birthday__month=today.month
-    ).order_by('birthday__day')
-
-    return render(request, 'departments/birthdays.html', {
-        'grouped': grouped,
-        'this_month': this_month,
-        'today': today,
-        'month_filter': month_filter,
-        'months': [(str(i+1), m) for i, m in enumerate(MONTHS)],
-    })
-
-
 # ── Hospitality Birthday Section ─────────────────────────────
 @login_required
 def birthday_list(request):
-    """All people with birthdays — for the Hospitality department."""
-    from apps.accounts.models import CustomUser, MemberProfile
-    import datetime
-
-    today      = datetime.date.today()
-    this_month = today.month
-
-    # Get all users with birthdays
-    users_with_bday = CustomUser.objects.filter(
-        birthday__isnull=False, is_active=True
-    ).order_by('birthday__month', 'birthday__day')
-
-    # Get all member profiles with birthdays
-    profiles_with_bday = MemberProfile.objects.filter(
-        birthday__isnull=False
-    ).order_by('birthday__month', 'birthday__day')
-
-    # Build unified list
-    everyone = []
-    for u in users_with_bday:
-        everyone.append({
-            'name':      u.get_full_name(),
-            'birthday':  u.birthday,
-            'month':     u.birthday.month,
-            'day':       u.birthday.day,
-            'type':      'System User',
-            'phone':     u.phone,
-            'this_month': u.birthday.month == this_month,
-            'today':     u.birthday.month == today.month and u.birthday.day == today.day,
-        })
-    for p in profiles_with_bday:
-        # Don't double-count if linked to a user
-        if not p.user_id:
-            everyone.append({
-                'name':      p.get_full_name(),
-                'birthday':  p.birthday,
-                'month':     p.birthday.month,
-                'day':       p.birthday.day,
-                'type':      'Member',
-                'phone':     p.phone,
-                'this_month': p.birthday.month == this_month,
-                'today':     p.birthday.month == today.month and p.birthday.day == today.day,
-            })
-
-    # Sort by month then day
-    everyone.sort(key=lambda x: (x['month'], x['day']))
-
-    # Group by month
-    months = {}
-    import calendar
-    for person in everyone:
-        month_name = calendar.month_name[person['month']]
-        months.setdefault(month_name, []).append(person)
-
-    return render(request, 'departments/birthdays.html', {
-        'months': months,
-        'everyone': everyone,
-        'this_month': calendar.month_name[this_month],
-        'today': today,
-        'today_birthdays': [p for p in everyone if p['today']],
-        'this_month_birthdays': [p for p in everyone if p['this_month']],
-    })
-
-
-@login_required
-def birthday_list(request):
     """Shows all people with birthdays, auto-populated from anyone in the system."""
-    from apps.accounts.models import CustomUser
     import datetime
+    from apps.accounts.models import CustomUser
 
     today      = datetime.date.today()
     this_month = today.month

@@ -1,0 +1,15 @@
+<div class="ci-card card p-3 mb-4">
+  {% for s in scoreboard %}
+  <div class="kb-score">
+    <b class="kb-rank">{{ forloop.counter }}</b>
+    <div class="avatar" style="width:36px;height:36px;font-size:.78rem;">{{ s.initials }}</div>
+    <div>
+      <strong style="color:var(--ci-primary);">{{ s.name }}</strong>
+      <div class="small text-muted">{{ s.count }} recruit{{ s.count|pluralize }} added</div>
+    </div>
+    <strong style="color:var(--ci-primary);">{{ s.count }}</strong>
+  </div>
+  {% empty %}
+  <p class="text-muted text-center mb-0 py-3">No recruits recorded yet.</p>
+  {% endfor %}
+</div>

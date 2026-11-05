@@ -58,6 +58,24 @@ def assign_leader(request, position_id):
                     is_active=is_active,
                     year=yr,
                 )
+
+            # Sync matching Department if applicable
+            dept_type_map = {
+                'choir_leader': 'choir',
+                'marketing_leader': 'marketing',
+                'hospitality_leader': 'hospitality',
+                'evangelism_leader': 'evangelism',
+                'prayer_leader': 'prayer',
+            }
+            mapped_dept = dept_type_map.get(position.name)
+            if mapped_dept:
+                from apps.departments.models import Department
+                Department.objects.filter(dept_type=mapped_dept, is_active=True).update(
+                    leader=leader,
+                    second_in_cmd=second,
+                    second_in_cmd_2=second_2,
+                )
+
             messages.success(request, f'{position} leadership updated.')
             return redirect('leadership_directory')
     else:

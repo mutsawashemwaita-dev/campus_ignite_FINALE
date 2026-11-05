@@ -98,6 +98,7 @@ def dashboard(request):
 
 
 @login_required
+@role_required('admin', 'pastor')
 def user_list(request):
     all_people = CustomUser.objects.select_related('role').order_by('first_name', 'last_name')
     users = all_people.exclude(password__startswith='!')
@@ -106,6 +107,7 @@ def user_list(request):
 
 
 @login_required
+@role_required('admin', 'pastor')
 def user_create(request):
     if request.method == 'POST':
         form = AddPersonForm(request.POST)
@@ -123,6 +125,7 @@ def user_create(request):
 
 
 @login_required
+@role_required('admin', 'pastor')
 def user_edit(request, pk):
     user_obj = get_object_or_404(CustomUser, pk=pk)
     if request.method == 'POST':
@@ -139,6 +142,7 @@ def user_edit(request, pk):
 
 
 @login_required
+@role_required('admin', 'pastor')
 def user_deactivate(request, pk):
     user_obj = get_object_or_404(CustomUser, pk=pk)
     if user_obj == request.user:
@@ -151,6 +155,7 @@ def user_deactivate(request, pk):
 
 
 @login_required
+@role_required('admin', 'pastor')
 def user_activate(request, pk):
     user_obj = get_object_or_404(CustomUser, pk=pk)
     user_obj.is_active = True
@@ -160,6 +165,7 @@ def user_activate(request, pk):
 
 
 @login_required
+@role_required('admin', 'pastor')
 def user_delete(request, pk):
     """Permanently delete a person — for wrongly added/duplicate entries.
     Refuses (safely) if the person is still linked to other records

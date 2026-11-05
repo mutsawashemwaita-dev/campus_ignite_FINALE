@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Evangelism Analytics{% endblock %}
+{% block page_title %}Evangelism Analytics{% endblock %}
+{% block extra_css %}{% include 'evangelism/_styles.html' %}{% endblock %}
+{% block content %}
+
+{% if not campaign %}
+<div class="alert alert-warning"><i class="fas fa-info-circle me-2"></i>There is no active evangelism campaign yet.</div>
+{% else %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <div class="d-flex gap-2">
+    <a href="{% url 'evangelism_home' %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-trophy me-1"></i>Leaderboard</a>
+    <a href="{% url 'evangelism_analytics' %}" class="btn btn-sm btn-ci"><i class="fas fa-chart-pie me-1"></i>Analytics</a>
+  </div>
+  <a href="{% url 'recruit_add' %}" class="btn btn-sm btn-ci-gold"><i class="fas fa-user-plus me-1"></i>Add member</a>
+</div>
+
+<p class="text-muted">{{ campaign.name }} · {{ campaign.semester_label }}</p>
+
+<h6 class="ci-section-header">Semester Cell Goals</h6>
+<div class="ci-card card p-3 mb-4">
+  {% for c in cells %}
+  <div class="kb-metric">
+    <div class="kb-metric-top"><span>{{ c.name }}</span><span>{{ c.count }}/{{ c.target }}</span></div>
+    <div class="kb-progress"><span style="width:{{ c.pct }}%;"></span></div>
+    <small class="text-muted d-block mt-1">{{ c.note }}</small>
+  </div>
+  {% empty %}
+  <p class="text-muted text-center mb-0 py-3">No cells have been given a goal for this campaign yet.</p>
+  {% endfor %}
+</div>
+
+<h6 class="ci-section-header">Members Scoreboard</h6>
+{% include 'evangelism/_scoreboard.html' %}
+
+<h6 class="ci-section-header">Records</h6>
+{% if not can_manage %}
+<p class="text-muted small"><i class="fas fa-lock me-1"></i>You can see the recruits you added. Evangelism leaders, pastors, admins and the chairperson can see everyone's.</p>
+{% endif %}
+
+<form method="get" class="ci-card card p-3 mb-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-7">
+      <label class="form-label small text-muted mb-1">Search records</label>
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search name, phone, program, cell…">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small text-muted mb-1">Member type</label>
+      <select name="type" class="form-select">
+        <option value="all">All Members</option>
+        {% for value, label in categories %}
+        <option value="{{ value }}" {% if value == type_filter %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2"><button type="submit" class="btn btn-ci w-100">Filter</button></div>
+  </div>
+</form>
+
+<div class="ci-card card">
+  <div class="table-responsive">
+    <table class="table ci-table mb-0">
+      <thead>
+        <tr>
+          <th>Full name</th><th>Referral</th><th>Phone</th><th>Program</th><th>Residency</th>
+          <th>Cell</th><th>Type</th><th>Added by</th><th>Date</th>{% if can_manage %}<th>Delete</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td class="fw-semibold" style="color:var(--ci-primary);">{{ r.full_name }}</td>
+          <td>{{ r.referral_name|default:"—" }}</td>
+          <td>{{ r.phone }}</td>
+          <td>{{ r.program|default:"—" }}</td>
+          <td>{{ r.residency|default:"—" }}</td>
+          <td>{{ r.cell.name|default:"—" }}</td>
+          <td><span class="badge-role">{{ r.get_category_display }}</span></td>
+          <td>{{ r.added_by.get_full_name|default:"—" }}</td>
+          <td>{{ r.date_added|date:"d M Y" }}</td>
+          {% if can_manage %}
+          <td>
+            <form method="post" action="{% url 'recruit_delete' r.pk %}" class="d-inline"
+                  onsubmit="return confirm('Remove {{ r.full_name|escapejs }}? This cannot be undone.');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% empty %}
+        <tr><td colspan="10" class="text-center text-muted py-4">No matching records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from apps.accounts.decorators import role_required
 from .models import Pastor
 from .forms import PastorForm
 
@@ -12,6 +13,7 @@ def pastor_list(request):
 
 
 @login_required
+@role_required('admin', 'pastor')
 def pastor_create(request):
     if request.method == 'POST':
         form = PastorForm(request.POST, request.FILES)
@@ -25,6 +27,7 @@ def pastor_create(request):
 
 
 @login_required
+@role_required('admin', 'pastor')
 def pastor_update(request, pk):
     pastor = get_object_or_404(Pastor, pk=pk)
     if request.method == 'POST':
@@ -39,6 +42,7 @@ def pastor_update(request, pk):
 
 
 @login_required
+@role_required('admin', 'pastor')
 def pastor_deactivate(request, pk):
     pastor = get_object_or_404(Pastor, pk=pk)
     pastor.is_active = False

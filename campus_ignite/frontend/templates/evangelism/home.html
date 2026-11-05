@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Kingdom Builders{% endblock %}
+{% block page_title %}Evangelism{% endblock %}
+{% block extra_css %}{% include 'evangelism/_styles.html' %}{% endblock %}
+{% block content %}
+
+{% if not campaign %}
+<div class="alert alert-warning">
+  <i class="fas fa-info-circle me-2"></i>There is no active evangelism campaign yet.
+  {% if user.is_admin or user.is_pastor or user.is_chairperson %}
+  <a href="{% url 'admin:evangelism_evangelismcampaign_add' %}">Set one up in the admin panel</a>.
+  {% else %}
+  Ask an admin to set one up.
+  {% endif %}
+</div>
+{% else %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <div class="d-flex gap-2">
+    <a href="{% url 'evangelism_home' %}" class="btn btn-sm btn-ci"><i class="fas fa-trophy me-1"></i>Leaderboard</a>
+    <a href="{% url 'evangelism_analytics' %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-chart-pie me-1"></i>Analytics</a>
+  </div>
+  <a href="{% url 'recruit_add' %}" class="btn btn-sm btn-ci-gold"><i class="fas fa-user-plus me-1"></i>Add member</a>
+</div>
+
+<div class="ci-card card text-center p-4 mb-4">
+  <p class="kb-eyebrow">Campus Ignite Evangelism</p>
+  <h3 class="fw-bold mb-1" style="color:var(--ci-primary);">{{ campaign.name }}</h3>
+  <p class="text-muted fw-semibold mb-0">{{ campaign.semester_label }} · Campus goal</p>
+  <div class="kb-donut" style="--p:{{ total_pct }}%;">
+    <div>
+      <strong style="font-size:1.6rem;color:var(--ci-primary);">{{ total }}/{{ campaign.campus_goal }}</strong><br>
+      <small class="text-muted text-uppercase fw-bold" style="font-size:.65rem;letter-spacing:.08em;">New members</small>
+    </div>
+  </div>
+</div>
+
+<h6 class="ci-section-header">Cell Leaderboard</h6>
+{% if campaign.prize_text %}
+<div class="kb-prize"><i class="fas fa-trophy me-2"></i>{{ campaign.prize_text }}</div>
+{% endif %}
+<div class="ci-card card p-3 mb-4">
+  {% for c in cells %}
+  <div class="kb-row">
+    <b class="kb-rank">{{ forloop.counter }}</b>
+    <div class="kb-logo">{% if c.logo %}<img src="{{ c.logo }}" alt="{{ c.name }}">{% else %}{{ c.name|first|upper }}{% endif %}</div>
+    <div>
+      <strong style="color:var(--ci-primary);">{{ c.name }}</strong>
+      <div class="small text-muted">{{ c.leader }} · {{ c.count }} new member{{ c.count|pluralize }}{% if c.over %} · +{{ c.over }} above goal{% endif %}</div>
+    </div>
+    <div class="kb-bar">
+      <div class="kb-progress"><span style="width:{{ c.pct }}%;"></span></div>
+      <small>{{ c.count }}/{{ c.target }}</small>
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-muted text-center mb-0 py-3">No cells have been given a goal for this campaign yet.</p>
+  {% endfor %}
+</div>
+
+<h6 class="ci-section-header">Members Scoreboard</h6>
+{% include 'evangelism/_scoreboard.html' %}
+
+{% endif %}
+{% endblock %}

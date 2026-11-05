@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Add Member{% endblock %}
+{% block page_title %}Add Evangelism Member{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-5">
+    <div class="mb-3">
+      <a href="{% url 'evangelism_home' %}" class="text-muted small"><i class="fas fa-arrow-left me-1"></i>Back to {{ campaign.name }}</a>
+    </div>
+    <div class="ci-form-card">
+      <p class="text-muted small mb-3">
+        <i class="fas fa-info-circle me-1"></i>Please make sure the person has agreed to Campus Ignite keeping their details before you record them.
+      </p>
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger small">{% for e in form.non_field_errors %}{{ e }}<br>{% endfor %}</div>
+      {% endif %}
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label">{{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}</label>
+          {{ field }}
+          {% if field.errors %}<div class="text-danger small">{{ field.errors.0 }}</div>{% endif %}
+        </div>
+        {% endfor %}
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-ci px-4"><i class="fas fa-save me-2"></i>Save member</button>
+          <a href="{% url 'evangelism_home' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

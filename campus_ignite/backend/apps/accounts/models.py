@@ -38,7 +38,9 @@ class CustomUser(AbstractUser):
     # We override by setting unusable password for member-only records
 
     def __str__(self):
-        return f"{self.get_full_name()} ({self.role})"
+        name = self.get_full_name().strip() or self.username
+        role_label = self.role.get_name_display() if self.role else 'Member'
+        return f"{name} ({role_label})"
 
     def has_role(self, *role_names):
         return self.role and self.role.name in role_names

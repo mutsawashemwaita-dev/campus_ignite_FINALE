@@ -1,14 +1,21 @@
-﻿# Virtual environment
+# Virtual environment
+venv/
 backend/camp/
+camp/
 
 # Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+**/*.pyc
 
-# Env file (contains your DB password - should never be committed)
+# Env file (contains passwords and secrets - never commit)
+.env
 backend/.env
 
 # Django
+staticfiles/
 backend/staticfiles/
+media/
 backend/media/
 db.sqlite3

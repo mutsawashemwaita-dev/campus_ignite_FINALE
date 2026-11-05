@@ -68,6 +68,9 @@ def newbie_update_status(request, pk):
 @login_required
 def newbie_delete(request, pk):
     newbie = get_object_or_404(Newbie, pk=pk)
+    if not (request.user.is_admin or request.user.is_pastor or newbie.registered_by_id == request.user.id):
+        messages.error(request, "You do not have permission to delete this record.")
+        return redirect('newbie_list')
     name = newbie.get_full_name()
     newbie.delete()
     messages.success(request, f'{name} removed.')

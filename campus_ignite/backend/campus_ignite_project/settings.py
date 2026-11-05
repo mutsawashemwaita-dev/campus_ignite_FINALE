@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'apps.departments',
     'apps.newbies',
     'apps.schedule',
+    'apps.evangelism',
 ]
 
 MIDDLEWARE = [
@@ -106,7 +107,10 @@ LOGOUT_REDIRECT_URL = '/auth/login/'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [FRONTEND_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+if DEBUG:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

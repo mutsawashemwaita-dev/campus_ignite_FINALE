@@ -25,8 +25,16 @@ def cell_detail(request, pk):
     })
 
 
+def _can_manage_cell(user, cell):
+    """Admins, pastors, chairperson and the cell facilitator/2IC can manage this cell."""
+    return bool(user.is_admin or user.is_pastor or user.is_chairperson or user.id in cell.get_leader_ids())
+
+
 @login_required
 def cell_create(request):
+    if not (request.user.is_admin or request.user.is_pastor or request.user.is_chairperson):
+        messages.error(request, 'Only administrators, pastors, or the chairperson can create cells.')
+        return redirect('cell_list')
     if request.method == 'POST':
         form = CellForm(request.POST)
         if form.is_valid():
@@ -41,6 +49,9 @@ def cell_create(request):
 @login_required
 def cell_update(request, pk):
     cell = get_object_or_404(Cell, pk=pk)
+    if not _can_manage_cell(request.user, cell):
+        messages.error(request, "You do not have permission to edit this cell.")
+        return redirect('cell_detail', pk=pk)
     if request.method == 'POST':
         form = CellForm(request.POST)
         if form.is_valid():
@@ -63,6 +74,9 @@ def cell_update(request, pk):
 @login_required
 def meeting_report_create(request, cell_pk):
     cell = get_object_or_404(Cell, pk=cell_pk)
+    if not _can_manage_cell(request.user, cell):
+        messages.error(request, "You do not have permission to submit reports for this cell.")
+        return redirect('cell_detail', pk=cell_pk)
     if request.method == 'POST':
         form = CellMeetingReportForm(request.POST)
         if form.is_valid():
@@ -80,6 +94,9 @@ def meeting_report_create(request, cell_pk):
 @login_required
 def cell_event_create(request, cell_pk):
     cell = get_object_or_404(Cell, pk=cell_pk)
+    if not _can_manage_cell(request.user, cell):
+        messages.error(request, "You do not have permission to add events for this cell.")
+        return redirect('cell_detail', pk=cell_pk)
     if request.method == 'POST':
         form = CellEventForm(request.POST)
         if form.is_valid():
@@ -162,6 +179,9 @@ def cell_members(request, pk):
 @login_required
 def add_cell_member(request, pk):
     cell = get_object_or_404(Cell, pk=pk)
+    if not _can_manage_cell(request.user, cell):
+        messages.error(request, "You do not have permission to manage members in this cell.")
+        return redirect('cell_members', pk=pk)
     if request.method == 'POST':
         username_or_name = request.POST.get('member_search', '').strip()
         attendance       = request.POST.get('attendance', 'regular')
@@ -202,6 +222,9 @@ def add_cell_member(request, pk):
 @login_required
 def remove_cell_member(request, pk, member_pk):
     cell   = get_object_or_404(Cell, pk=pk)
+    if not _can_manage_cell(request.user, cell):
+        messages.error(request, "You do not have permission to remove members from this cell.")
+        return redirect('cell_members', pk=pk)
     member = get_object_or_404(CellMember, pk=member_pk, cell=cell)
     name   = member.user.get_full_name()
     member.delete()
@@ -212,6 +235,9 @@ def remove_cell_member(request, pk, member_pk):
 @login_required
 def update_member_attendance(request, pk, member_pk):
     cell   = get_object_or_404(Cell, pk=pk)
+    if not _can_manage_cell(request.user, cell):
+        messages.error(request, "You do not have permission to update member attendance in this cell.")
+        return redirect('cell_members', pk=pk)
     member = get_object_or_404(CellMember, pk=member_pk, cell=cell)
     attendance = request.POST.get('attendance', member.attendance)
     member.attendance = attendance
