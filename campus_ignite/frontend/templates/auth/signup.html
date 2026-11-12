@@ -7,28 +7,53 @@
   <title>Create Account – Campus Ignite</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="{% static 'css/campus_ignite.css' %}" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #060d18;
+      overflow-x: hidden;
+    }
+  </style>
 </head>
 <body>
-<div class="ci-login-bg d-flex align-items-center justify-content-center py-4">
-  <div class="ci-login-card card border-0 shadow-lg" style="max-width:460px;width:100%;">
-    <div style="background:var(--ci-primary);padding:2rem 1.5rem 1.5rem;text-align:center;">
-      <div style="margin:0 auto .75rem;text-align:center;">
-        <img src="{% static 'img/logo.png.jpeg' %}"
-             style="width:80px;height:80px;object-fit:contain;border-radius:50%;">
+
+<div class="ci-login-wrapper py-4" id="signupContainer">
+  <!-- Dynamic Auroral Floating Light Orbs -->
+  <div class="ci-orb ci-orb-1"></div>
+  <div class="ci-orb ci-orb-2"></div>
+  <div class="ci-orb ci-orb-3"></div>
+
+  <!-- Interactive Embers & Constellation Particle Canvas -->
+  <canvas id="igniteCanvas"></canvas>
+
+  <div class="ci-login-card-live" id="signupCard" style="max-width:480px;width:100%;">
+    <!-- Card Header with Pulsing Halo & Flame Accent -->
+    <div class="ci-card-header">
+      <div class="ci-logo-halo">
+        <img src="{% static 'img/logo.png.jpeg' %}" alt="Campus Ignite" class="ci-logo-img">
       </div>
-      <h4 style="color:#fff;font-weight:700;margin:0;">Campus Ignite</h4>
-      <p style="color:rgba(255,255,255,.55);font-size:.8rem;margin:.25rem 0 0;">Department Leader Registration</p>
+      <h3 class="ci-live-title">Campus Ignite</h3>
+      <p class="ci-live-sub">Department Leader Registration</p>
     </div>
-    <div class="card-body p-4">
-      <p class="text-center text-muted mb-4" style="font-size:.9rem;">
-        Register as a leader of your department — you'll only be able to manage that one department.
-      </p>
+
+    <!-- Form Content -->
+    <div class="card-body p-4 p-md-4">
+      <div class="text-center mb-3">
+        <span class="ci-live-badge">
+          <span class="ci-pulse-dot"></span>
+          NEW LEADER ACCESS
+        </span>
+        <p class="text-muted small mb-0">Register as a leader to manage your ministry department</p>
+      </div>
 
       {% if form.non_field_errors %}
-        <div class="alert alert-danger py-2 small">
-          <i class="fas fa-exclamation-circle me-1"></i> {{ form.non_field_errors.0 }}
+        <div class="alert alert-danger py-2 small rounded-3 mb-3 d-flex align-items-center">
+          <i class="fas fa-exclamation-triangle me-2 text-danger"></i>
+          <div>{{ form.non_field_errors.0 }}</div>
         </div>
       {% endif %}
 
@@ -36,64 +61,264 @@
         {% csrf_token %}
         <div class="row g-2 mb-2">
           <div class="col-6">
-            <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">First Name</label>
+            <label class="form-label fw-semibold small mb-1" style="color:var(--ci-primary);">First Name</label>
             {{ form.first_name }}
             {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>{% endif %}
           </div>
           <div class="col-6">
-            <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">Last Name</label>
+            <label class="form-label fw-semibold small mb-1" style="color:var(--ci-primary);">Last Name</label>
             {{ form.last_name }}
             {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>{% endif %}
           </div>
         </div>
 
         <div class="mb-2">
-          <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">Email</label>
+          <label class="form-label fw-semibold small mb-1" style="color:var(--ci-primary);">Email</label>
           {{ form.email }}
+          {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
         </div>
 
         <div class="mb-2">
-          <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">Phone</label>
+          <label class="form-label fw-semibold small mb-1" style="color:var(--ci-primary);">Phone</label>
           {{ form.phone }}
+          {% if form.phone.errors %}<div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>{% endif %}
         </div>
 
         <div class="mb-2">
-          <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">
-            <i class="fas fa-layer-group me-1"></i>Department
+          <label class="form-label fw-semibold small mb-1" style="color:var(--ci-primary);">
+            <i class="fas fa-layer-group me-1" style="color:#C8A951;"></i>Department
           </label>
           {{ form.department }}
-          <small class="text-muted">{{ form.department.help_text }}</small>
+          {% if form.department.help_text %}<small class="text-muted d-block mt-1">{{ form.department.help_text }}</small>{% endif %}
           {% if form.department.errors %}<div class="text-danger small mt-1">{{ form.department.errors.0 }}</div>{% endif %}
         </div>
 
         <div class="mb-2">
-          <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">Username</label>
+          <label class="form-label fw-semibold small mb-1" style="color:var(--ci-primary);">Username</label>
           {{ form.username }}
           {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>{% endif %}
         </div>
 
         <div class="row g-2 mb-3">
           <div class="col-6">
-            <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">Password</label>
+            <label class="form-label fw-semibold small mb-1" style="color:var(--ci-primary);">Password</label>
             {{ form.password }}
+            {% if form.password.errors %}<div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>{% endif %}
           </div>
           <div class="col-6">
-            <label class="form-label fw-semibold" style="color:var(--ci-primary);font-size:.85rem;">Confirm</label>
+            <label class="form-label fw-semibold small mb-1" style="color:var(--ci-primary);">Confirm</label>
             {{ form.confirm_password }}
+            {% if form.confirm_password.errors %}<div class="text-danger small mt-1">{{ form.confirm_password.errors.0 }}</div>{% endif %}
           </div>
         </div>
 
-        <button type="submit" class="btn btn-ci w-100 fw-semibold py-2">
-          <i class="fas fa-user-plus me-2"></i>Create Account
+        <button type="submit" class="btn ci-btn-live w-100 d-flex align-items-center justify-content-center">
+          <i class="fas fa-user-plus me-2"></i>Create Leader Account
         </button>
       </form>
 
-      <p class="text-center text-muted mt-3 mb-0" style="font-size:.85rem;">
-        Already have an account? <a href="{% url 'login' %}" style="color:var(--ci-primary);font-weight:600;">Sign in</a>
-      </p>
+      <div class="text-center mt-3 pt-2 border-top">
+        <p class="text-muted small mb-0">
+          Already have an account?
+          <a href="{% url 'login' %}" style="color:var(--ci-primary);font-weight:700;text-decoration:none;">
+            Sign in
+          </a>
+        </p>
+      </div>
     </div>
   </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // ── Live Interactive Ember & Constellation Canvas Engine ────
+  (function () {
+    const canvas = document.getElementById('igniteCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+    let mouse = { x: null, y: null, maxRadius: 110 };
+
+    const sparkColors = [
+      'rgba(200, 169, 81, ',  // CI Gold
+      'rgba(255, 175, 55, ',  // Warm Amber
+      'rgba(255, 105, 30, ',  // Flame Orange
+      'rgba(255, 220, 120, ', // Bright Spark
+      'rgba(80, 160, 255, '   // Celestial Blue
+    ];
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = canvas.width = window.innerWidth * dpr;
+      height = canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.scale(dpr, dpr);
+    }
+
+    class EmberParticle {
+      constructor(isBurst = false, burstX, burstY) {
+        this.reset(isBurst, burstX, burstY);
+      }
+
+      reset(isBurst = false, burstX, burstY) {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        if (isBurst) {
+          this.x = burstX;
+          this.y = burstY;
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 1.5 + Math.random() * 4.5;
+          this.vx = Math.cos(angle) * speed;
+          this.vy = Math.sin(angle) * speed;
+          this.radius = 1.5 + Math.random() * 2.5;
+          this.alpha = 1;
+          this.decay = 0.015 + Math.random() * 0.025;
+          this.colorPrefix = sparkColors[Math.floor(Math.random() * 4)];
+          this.isBurst = true;
+          return;
+        }
+
+        this.isBurst = false;
+        this.x = Math.random() * vw;
+        this.y = vh + Math.random() * 40;
+        this.vx = (Math.random() - 0.5) * 0.7;
+        this.vy = -(0.5 + Math.random() * 1.3);
+        this.radius = 1.2 + Math.random() * 2.6;
+        this.baseAlpha = 0.25 + Math.random() * 0.65;
+        this.alpha = this.baseAlpha;
+        this.pulse = Math.random() * Math.PI * 2;
+        this.pulseSpeed = 0.02 + Math.random() * 0.04;
+        this.colorPrefix = sparkColors[Math.floor(Math.random() * sparkColors.length)];
+      }
+
+      update() {
+        if (this.isBurst) {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vx *= 0.96;
+          this.vy += 0.05;
+          this.alpha -= this.decay;
+          return this.alpha > 0;
+        }
+
+        this.x += this.vx + Math.sin(this.pulse) * 0.45;
+        this.y += this.vy;
+        this.pulse += this.pulseSpeed;
+        this.alpha = this.baseAlpha * (0.65 + Math.sin(this.pulse) * 0.35);
+
+        if (mouse.x !== null) {
+          const dx = this.x - mouse.x;
+          const dy = this.y - mouse.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < mouse.maxRadius) {
+            const force = (mouse.maxRadius - dist) / mouse.maxRadius;
+            this.x += (dx / dist) * force * 1.8;
+            this.y += (dy / dist) * force * 1.8;
+          }
+        }
+
+        if (this.y < -30 || this.x < -40 || this.x > window.innerWidth + 40) {
+          this.reset();
+        }
+        return true;
+      }
+
+      draw() {
+        if (this.alpha <= 0) return;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.colorPrefix + Math.max(this.alpha, 0) + ')';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.colorPrefix + '0.8)';
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    const particleCount = Math.min(Math.floor(window.innerWidth / 20), 60);
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < particleCount; i++) {
+        const p = new EmberParticle();
+        p.y = Math.random() * window.innerHeight;
+        particles.push(p);
+      }
+    }
+
+    function drawConnections() {
+      const maxDist = 80;
+      for (let i = 0; i < particles.length; i++) {
+        if (particles[i].isBurst) continue;
+        for (let j = i + 1; j < particles.length; j++) {
+          if (particles[j].isBurst) continue;
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < maxDist) {
+            const lineAlpha = (1 - dist / maxDist) * 0.16;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(200, 169, 81, ${lineAlpha})`;
+            ctx.lineWidth = 0.75;
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    let animId;
+    function animate() {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      drawConnections();
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const alive = particles[i].update();
+        if (alive) {
+          particles[i].draw();
+        } else {
+          particles.splice(i, 1);
+        }
+      }
+
+      animId = requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', () => {
+      resize();
+      initParticles();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    window.addEventListener('mouseleave', () => {
+      mouse.x = null;
+      mouse.y = null;
+    });
+
+    window.addEventListener('click', (e) => {
+      for (let i = 0; i < 16; i++) {
+        particles.push(new EmberParticle(true, e.clientX, e.clientY));
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        cancelAnimationFrame(animId);
+      } else {
+        animate();
+      }
+    });
+
+    resize();
+    initParticles();
+    animate();
+  })();
+</script>
 </body>
 </html>
