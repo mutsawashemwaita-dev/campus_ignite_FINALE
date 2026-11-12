@@ -210,6 +210,8 @@ class AddPersonForm(forms.Form):
                 birthday=data.get('birthday'),
                 role=role,
             )
+            user.is_member_only = False
+            user.save()
         else:
             # Member only — no login
             user = CustomUser(
@@ -220,6 +222,7 @@ class AddPersonForm(forms.Form):
                 phone=data.get('phone', ''),
                 birthday=data.get('birthday'),
                 role=role,
+                is_member_only=True,
             )
             user.set_unusable_password()
             user.save()
@@ -236,6 +239,10 @@ class AddPersonForm(forms.Form):
 
 
 class EditPersonForm(forms.ModelForm):
+    username = forms.CharField(
+        label='Username', required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username (required for login users)'})
+    )
     role_name = forms.CharField(
         label='Role', required=False,
         widget=forms.TextInput(attrs={
@@ -266,6 +273,8 @@ class EditPersonForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance:
+            self.fields['username'].initial = self.instance.username
         if self.instance and self.instance.role:
             self.fields['role_name'].initial = self.instance.role.name
         if self.instance and self.instance.pk:
@@ -273,6 +282,13 @@ class EditPersonForm(forms.ModelForm):
             self.fields['is_student_anchor'].initial = StudentAnchor.objects.filter(
                 user=self.instance, is_active=True
             ).exists()
+
+    def clean_username(self):
+        new_un = self.cleaned_data.get('username', '').strip()
+        if new_un and self.instance:
+            if CustomUser.objects.filter(username=new_un).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError(f'Username "{new_un}" is already taken.')
+        return new_un
 
     def clean_role_name(self):
         role_name = self.cleaned_data.get('role_name', '').strip().lower()
@@ -285,6 +301,9 @@ class EditPersonForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
+        new_un = self.cleaned_data.get('username', '').strip()
+        if new_un:
+            user.username = new_un
         role_name = self.cleaned_data.get('role_name', '').strip()
         if role_name:
             role, _ = Role.objects.get_or_create(name=role_name)
@@ -294,6 +313,9 @@ class EditPersonForm(forms.ModelForm):
         new_pw = self.cleaned_data.get('new_password', '').strip()
         if new_pw:
             user.set_password(new_pw)
+            user.is_member_only = False
+        elif not user.has_usable_password():
+            user.is_member_only = True
         if commit:
             user.save()
 

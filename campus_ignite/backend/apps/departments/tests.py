@@ -73,3 +73,31 @@ class DepartmentSyncTests(TestCase):
         # Department leader should now be automatically updated to new_leader!
         self.choir_dept.refresh_from_db()
         self.assertEqual(self.choir_dept.leader, new_leader)
+
+    def test_department_form_with_dropdown_and_choices(self):
+        from apps.departments.forms import DepartmentForm
+        form = DepartmentForm(data={
+            'name': 'Media & Visuals',
+            'dept_type': 'media',
+            'description': 'Handles live streaming',
+            'leader': self.admin_user.pk,
+            'second_in_cmd': self.choir_leader.pk,
+        })
+        self.assertTrue(form.is_valid(), form.errors)
+        dept = form.save()
+        self.assertEqual(dept.dept_type, 'media')
+        self.assertEqual(dept.leader, self.admin_user)
+        self.assertEqual(dept.second_in_cmd, self.choir_leader)
+
+    def test_department_form_legacy_username_support(self):
+        from apps.departments.forms import DepartmentForm
+        form = DepartmentForm(data={
+            'name': 'Prayer Ministry',
+            'dept_type': 'prayer',
+            'leader_username': 'dept_admin',
+            'second_in_cmd_username': 'choir_lead',
+        })
+        self.assertTrue(form.is_valid(), form.errors)
+        dept = form.save()
+        self.assertEqual(dept.leader, self.admin_user)
+        self.assertEqual(dept.second_in_cmd, self.choir_leader)

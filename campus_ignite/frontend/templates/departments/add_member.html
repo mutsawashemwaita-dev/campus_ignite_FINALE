@@ -11,8 +11,13 @@
         <div class="mb-3">
           <label class="form-label">Member Username or Full Name <span class="text-danger">*</span></label>
           
-          <input type="text" name="member_username" class="form-control" placeholder="e.g. johndoe or John Doe">
-          <small class="text-muted">Use their username if they have a login, or their full name if they don't.</small>
+          <input type="text" name="member_username" list="active-user-list" class="form-control" placeholder="e.g. johndoe or John Doe">
+          <datalist id="active-user-list">
+            {% for u in available_users %}
+              <option value="{{ u.username }}">{{ u.get_full_name }} (@{{ u.username }})</option>
+            {% endfor %}
+          </datalist>
+          <small class="text-muted">Use autocomplete suggestion, or type their username/full name.</small>
           {% if form.member_username.errors %}<div class="text-danger small mt-1">{{ form.member_username.errors.0 }}</div>{% endif %}
         </div>
       

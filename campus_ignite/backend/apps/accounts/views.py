@@ -2,7 +2,7 @@ from django.contrib.auth import login, logout, authenticate, update_session_auth
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.db.models import ProtectedError
+from django.db.models import ProtectedError, Q
 from .forms import CustomLoginForm, SignupForm, AddPersonForm, EditPersonForm, ProfileUpdateForm
 from .models import CustomUser, Role
 from .decorators import role_required
@@ -101,8 +101,8 @@ def dashboard(request):
 @role_required('admin', 'pastor')
 def user_list(request):
     all_people = CustomUser.objects.select_related('role').order_by('first_name', 'last_name')
-    users = all_people.exclude(password__startswith='!')
-    members = all_people.filter(password__startswith='!')
+    users = all_people.filter(is_member_only=False).exclude(password__startswith='!')
+    members = all_people.filter(Q(is_member_only=True) | Q(password__startswith='!'))
     return render(request, 'accounts/user_list.html', {'users': users, 'members': members})
 
 

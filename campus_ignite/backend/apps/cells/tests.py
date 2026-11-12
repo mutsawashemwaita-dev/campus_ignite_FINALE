@@ -60,3 +60,33 @@ class CellsTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(CellMember.objects.filter(cell=self.cell, user=self.other_user).exists())
+
+    def test_cell_form_with_model_choice(self):
+        from apps.cells.forms import CellForm
+        form = CellForm(data={
+            'name': 'Bethel Cell',
+            'cell_type_name': 'Campus Cell',
+            'venue': 'Hall 3',
+            'meeting_day': 'Thursday',
+            'meeting_time': '18:00',
+            'facilitator': self.facilitator.pk,
+            'second_in_cmd': self.other_user.pk,
+        })
+        self.assertTrue(form.is_valid(), form.errors)
+        cell = form.save()
+        self.assertEqual(cell.facilitator, self.facilitator)
+        self.assertEqual(cell.second_in_cmd, self.other_user)
+
+    def test_cell_form_legacy_username_fallback(self):
+        from apps.cells.forms import CellForm
+        form = CellForm(data={
+            'name': 'Gilead Cell',
+            'cell_type_name': 'Ladies Cell',
+            'venue': 'Room 1',
+            'meeting_day': 'Tuesday',
+            'meeting_time': '16:00',
+            'facilitator_username': 'cell_facilitator',
+        })
+        self.assertTrue(form.is_valid(), form.errors)
+        cell = form.save()
+        self.assertEqual(cell.facilitator, self.facilitator)

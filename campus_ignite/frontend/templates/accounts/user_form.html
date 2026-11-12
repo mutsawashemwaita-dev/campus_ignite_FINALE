@@ -56,7 +56,6 @@
             Regular members <strong>do not need</strong> a username or password. Leave these blank if they just attend cell.
           </div>
           <div class="row g-3">
-            {% if not edit %}
             <div class="col-12">
               <label class="form-label">Username</label>
               <input type="text" name="username" class="form-control"
@@ -64,7 +63,6 @@
                      placeholder="e.g. john_doe — leave blank for regular members">
               {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.0 }}</div>{% endif %}
             </div>
-            {% endif %}
             <div class="col-12">
               <label class="form-label">Role</label>
               <input type="text" name="role_name" class="form-control"

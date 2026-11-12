@@ -1,4 +1,5 @@
 from django import forms
+from apps.accounts.models import CustomUser
 from .models import Department, DepartmentMember, DepartmentPost, DepartmentEvent
  
 class DepartmentEventForm(forms.ModelForm):
@@ -17,93 +18,127 @@ class DepartmentForm(forms.Form):
         label='Department Name',
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Zion Choir, Media Team'})
     )
-    dept_type = forms.CharField(
+    dept_type = forms.ChoiceField(
         label='Department Type',
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'choir / hospitality / marketing / evangelism / prayer / ushering / media / welfare / youth / other'
-        }),
-        help_text='Enter one of: choir, hospitality, marketing, evangelism, prayer, ushering, media, welfare, youth, other'
+        choices=Department.DEPT_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
     description = forms.CharField(
         label='Description',
         required=False,
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Brief description of this department...'})
     )
-    leader_username = forms.CharField(
-        label='Leader Username',
+    leader = forms.ModelChoiceField(
+        label='Department Leader',
+        queryset=CustomUser.objects.none(),
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Type the leader\'s username'})
+        empty_label='-- Select Leader (Optional) --',
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
-    second_in_cmd_username = forms.CharField(
-        label='2IC Username',
+    second_in_cmd = forms.ModelChoiceField(
+        label='First 2IC',
+        queryset=CustomUser.objects.none(),
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Type the 2IC\'s username (optional)'})
+        empty_label='-- Select First 2IC (Optional) --',
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
-    second_in_cmd_2_username = forms.CharField(
-        label='Second 2IC Username',
+    second_in_cmd_2 = forms.ModelChoiceField(
+        label='Second 2IC',
+        queryset=CustomUser.objects.none(),
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Type the second 2IC\'s username (optional)'})
+        empty_label='-- Select Second 2IC (Optional) --',
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
- 
-    def clean_dept_type(self):
-        val = self.cleaned_data.get('dept_type', '').strip().lower()
-        valid = ['choir','hospitality','marketing','evangelism','prayer','ushering','media','welfare','youth','other']
-        if val not in valid:
-            raise forms.ValidationError(f'Choose from: {", ".join(valid)}')
-        return val
- 
-    def _lookup_user(self, field_name):
-        from apps.accounts.models import CustomUser
-        username = self.cleaned_data.get(field_name, '').strip()
-        if not username:
-            return None
-        try:
-            return CustomUser.objects.get(username=username)
-        except CustomUser.DoesNotExist:
-            raise forms.ValidationError(f'No user found with username "{username}".')
- 
-    def clean_leader_username(self):
-        return self._lookup_user('leader_username')
- 
-    def clean_second_in_cmd_username(self):
-        return self._lookup_user('second_in_cmd_username')
- 
-    def clean_second_in_cmd_2_username(self):
-        return self._lookup_user('second_in_cmd_2_username')
- 
+    # Hidden/legacy string fields for fallback & backwards-compatibility
+    leader_username = forms.CharField(required=False, widget=forms.HiddenInput())
+    second_in_cmd_username = forms.CharField(required=False, widget=forms.HiddenInput())
+    second_in_cmd_2_username = forms.CharField(required=False, widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        user_qs = CustomUser.objects.filter(is_active=True).order_by('first_name', 'last_name')
+        self.fields['leader'].queryset = user_qs
+        self.fields['second_in_cmd'].queryset = user_qs
+        self.fields['second_in_cmd_2'].queryset = user_qs
+        if 'initial' in kwargs:
+            init = kwargs['initial']
+            for field, legacy in [('leader', 'leader_username'), ('second_in_cmd', 'second_in_cmd_username'), ('second_in_cmd_2', 'second_in_cmd_2_username')]:
+                if legacy in init and not init.get(field) and init[legacy]:
+                    try:
+                        self.initial[field] = CustomUser.objects.get(username=init[legacy])
+                    except CustomUser.DoesNotExist:
+                        pass
+
     def clean(self):
         cleaned = super().clean()
-        leader = cleaned.get('leader_username')
-        ic1 = cleaned.get('second_in_cmd_username')
-        ic2 = cleaned.get('second_in_cmd_2_username')
+
+        # Resolve leader
+        leader = cleaned.get('leader')
+        leader_un = self.data.get('leader_username', '').strip()
+        if not leader and leader_un:
+            try:
+                leader = CustomUser.objects.get(username=leader_un)
+                cleaned['leader'] = leader
+            except CustomUser.DoesNotExist:
+                self.add_error('leader', f'No user found with username "{leader_un}".')
+
+        # Resolve second_in_cmd
+        ic1 = cleaned.get('second_in_cmd')
+        ic1_un = self.data.get('second_in_cmd_username', '').strip()
+        if not ic1 and ic1_un:
+            try:
+                ic1 = CustomUser.objects.get(username=ic1_un)
+                cleaned['second_in_cmd'] = ic1
+            except CustomUser.DoesNotExist:
+                self.add_error('second_in_cmd', f'No user found with username "{ic1_un}".')
+
+        # Resolve second_in_cmd_2
+        ic2 = cleaned.get('second_in_cmd_2')
+        ic2_un = self.data.get('second_in_cmd_2_username', '').strip()
+        if not ic2 and ic2_un:
+            try:
+                ic2 = CustomUser.objects.get(username=ic2_un)
+                cleaned['second_in_cmd_2'] = ic2
+            except CustomUser.DoesNotExist:
+                self.add_error('second_in_cmd_2', f'No user found with username "{ic2_un}".')
+
         if ic1 and ic2 and ic1 == ic2:
-            raise forms.ValidationError('The two 2ICs must be two different people.')
+            self.add_error('second_in_cmd_2', 'The two 2ICs must be two different people.')
+        if leader and ic1 and leader == ic1:
+            self.add_error('second_in_cmd', 'The leader cannot also be the 2IC.')
         if leader and ic2 and leader == ic2:
-            raise forms.ValidationError('The leader cannot also be the second 2IC.')
+            self.add_error('second_in_cmd_2', 'The leader cannot also be the second 2IC.')
+
+        # Populate legacy username fields in cleaned_data
+        cleaned['leader_username'] = leader
+        cleaned['second_in_cmd_username'] = ic1
+        cleaned['second_in_cmd_2_username'] = ic2
         return cleaned
- 
+
     def save(self, instance=None):
         data = self.cleaned_data
+        leader = data.get('leader')
+        ic1 = data.get('second_in_cmd')
+        ic2 = data.get('second_in_cmd_2')
         if instance:
-            instance.name          = data['name']
-            instance.dept_type     = data['dept_type']
-            instance.description   = data.get('description', '')
-            instance.leader        = data['leader_username']
-            instance.second_in_cmd = data['second_in_cmd_username']
-            instance.second_in_cmd_2 = data['second_in_cmd_2_username']
+            instance.name = data['name']
+            instance.dept_type = data['dept_type']
+            instance.description = data.get('description', '')
+            instance.leader = leader
+            instance.second_in_cmd = ic1
+            instance.second_in_cmd_2 = ic2
             instance.save()
             return instance
         return Department.objects.create(
-            name           = data['name'],
-            dept_type      = data['dept_type'],
-            description    = data.get('description', ''),
-            leader         = data['leader_username'],
-            second_in_cmd  = data['second_in_cmd_username'],
-            second_in_cmd_2= data['second_in_cmd_2_username'],
+            name=data['name'],
+            dept_type=data['dept_type'],
+            description=data.get('description', ''),
+            leader=leader,
+            second_in_cmd=ic1,
+            second_in_cmd_2=ic2,
         )
- 
- 
+
+
 class DepartmentMemberForm(forms.Form):
     member_username = forms.CharField(
         label='Member Username or Full Name',
@@ -234,6 +269,7 @@ class DepartmentNewMemberForm(forms.Form):
             email=data.get('email', ''),
             phone=data.get('phone', ''),
             birthday=data.get('birthday'),
+            is_member_only=True,
         )
         user.set_unusable_password()
         user.save()

@@ -61,7 +61,9 @@ def cell_update(request, pk):
     else:
         form = CellForm(initial={
             'name':                   cell.name,
-            'facilitator_username':   cell.facilitator.username,
+            'facilitator':            cell.facilitator,
+            'second_in_cmd':          cell.second_in_cmd,
+            'facilitator_username':   cell.facilitator.username if cell.facilitator else '',
             'second_in_cmd_username': cell.second_in_cmd.username if cell.second_in_cmd else '',
             'cell_type_name':         cell.cell_type.name if cell.cell_type else '',
             'meeting_day':            cell.meeting_day,
@@ -87,7 +89,10 @@ def meeting_report_create(request, cell_pk):
             messages.success(request, 'Meeting report submitted.')
             return redirect('cell_detail', pk=cell_pk)
     else:
-        form = CellMeetingReportForm(initial={'facilitated_by_username': request.user.username})
+        form = CellMeetingReportForm(initial={
+            'facilitated_by': request.user,
+            'facilitated_by_username': request.user.username,
+        })
     return render(request, 'cells/meeting_report_form.html', {'form': form, 'cell': cell})
 
 

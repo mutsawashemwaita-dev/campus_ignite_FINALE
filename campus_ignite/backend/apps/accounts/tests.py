@@ -31,6 +31,59 @@ class AccountsModelTests(TestCase):
         self.assertTrue(member.is_member_only)
         self.assertEqual(str(member), "Jane Smith (Member)")
 
+    def test_manager_login_users_and_member_attendees(self):
+        login_u = CustomUser.objects.create_user(
+            username='leader_mark',
+            password='Password123!',
+            first_name='Mark',
+            last_name='Leader',
+            role=self.leader_role
+        )
+        attendee = CustomUser.objects.create(
+            username='member_abc999',
+            first_name='Grace',
+            last_name='Attendee',
+        )
+        attendee.set_unusable_password()
+        attendee.save()
+
+        login_users = list(CustomUser.objects.login_users())
+        attendees = list(CustomUser.objects.member_attendees())
+
+        self.assertIn(login_u, login_users)
+        self.assertNotIn(attendee, login_users)
+        self.assertIn(attendee, attendees)
+        self.assertNotIn(login_u, attendees)
+
+    def test_promote_member_to_login_user(self):
+        from apps.accounts.forms import EditPersonForm
+        attendee = CustomUser.objects.create(
+            username='member_temp123',
+            first_name='Peter',
+            last_name='Promote',
+        )
+        attendee.set_unusable_password()
+        attendee.save()
+        self.assertTrue(attendee.is_member_only)
+
+        form = EditPersonForm(
+            data={
+                'first_name': 'Peter',
+                'last_name': 'Promote',
+                'username': 'peter_leader',
+                'new_password': 'NewPassword123!',
+                'role_name': 'cell_leader',
+            },
+            instance=attendee
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        updated = form.save()
+
+        self.assertEqual(updated.username, 'peter_leader')
+        self.assertFalse(updated.is_member_only)
+        self.assertTrue(updated.has_usable_password())
+        self.assertEqual(updated.role.name, Role.CELL_LEADER)
+
 
 class AccountsAuthorizationTests(TestCase):
     def setUp(self):

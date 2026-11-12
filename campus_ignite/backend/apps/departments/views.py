@@ -97,8 +97,12 @@ def department_edit(request, pk):
             return redirect('department_detail', pk=pk)
     else:
         form = DepartmentForm(initial={
-            'name': dept.name, 'dept_type': dept.dept_type,
+            'name': dept.name,
+            'dept_type': dept.dept_type,
             'description': dept.description,
+            'leader': dept.leader,
+            'second_in_cmd': dept.second_in_cmd,
+            'second_in_cmd_2': dept.second_in_cmd_2,
             'leader_username': dept.leader.username if dept.leader else '',
             'second_in_cmd_username': dept.second_in_cmd.username if dept.second_in_cmd else '',
             'second_in_cmd_2_username': dept.second_in_cmd_2.username if dept.second_in_cmd_2 else '',
@@ -127,7 +131,8 @@ def add_member(request, pk):
             return redirect('department_detail', pk=pk)
     else:
         form = DepartmentMemberForm()
-    return render(request, 'departments/add_member.html', {'form': form, 'dept': dept})
+    available_users = CustomUser.objects.filter(is_active=True).exclude(dept_memberships__department=dept).order_by('first_name', 'last_name')
+    return render(request, 'departments/add_member.html', {'form': form, 'dept': dept, 'available_users': available_users})
 
 
 @login_required

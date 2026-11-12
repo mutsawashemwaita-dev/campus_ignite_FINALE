@@ -12,14 +12,25 @@
           <div class="mb-3">
             <label class="form-label">Cell Name <span class="text-danger">*</span></label>
             <input type="text" name="name" class="form-control" value="{{ form.name.value|default:'' }}" placeholder="e.g. Zion Cell, Grace Cell">
+            {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors.0 }}</div>{% endif %}
           </div>
           <div class="mb-3">
             <label class="form-label">Cell Type <span class="text-danger">*</span></label>
-            <input type="text" name="cell_type_name" class="form-control" value="{{ form.cell_type_name.value|default:'' }}" placeholder="e.g. Freshman Cell, Ladies Cell, Graduate Cell, Couples Cell">
+            <input type="text" name="cell_type_name" class="form-control" list="cell-type-list" value="{{ form.cell_type_name.value|default:'' }}" placeholder="e.g. Campus Cell, Ladies Cell, Men's Cell, Graduate Cell">
+            <datalist id="cell-type-list">
+              <option value="Campus Cell">
+              <option value="Ladies Cell">
+              <option value="Men's Cell">
+              <option value="Freshman Cell">
+              <option value="Graduate Cell">
+              <option value="Couples Cell">
+            </datalist>
+            {% if form.cell_type_name.errors %}<div class="text-danger small">{{ form.cell_type_name.errors.0 }}</div>{% endif %}
           </div>
           <div class="mb-3">
             <label class="form-label">Venue</label>
             <input type="text" name="venue" class="form-control" value="{{ form.venue.value|default:'' }}" placeholder="e.g. Room 4B, Campus Library">
+            {% if form.venue.errors %}<div class="text-danger small">{{ form.venue.errors.0 }}</div>{% endif %}
           </div>
         </div>
         <div class="ci-form-section mb-4">
@@ -27,32 +38,45 @@
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label">Meeting Day <span class="text-danger">*</span></label>
-              <input type="text" name="meeting_day" class="form-control" value="{{ form.meeting_day.value|default:'' }}" placeholder="e.g. Monday, Wednesday, Friday">
+              <input type="text" name="meeting_day" class="form-control" list="day-list" value="{{ form.meeting_day.value|default:'' }}" placeholder="e.g. Wednesday">
+              <datalist id="day-list">
+                <option value="Monday">
+                <option value="Tuesday">
+                <option value="Wednesday">
+                <option value="Thursday">
+                <option value="Friday">
+                <option value="Saturday">
+                <option value="Sunday">
+              </datalist>
+              {% if form.meeting_day.errors %}<div class="text-danger small">{{ form.meeting_day.errors.0 }}</div>{% endif %}
             </div>
             <div class="col-md-6">
               <label class="form-label">Meeting Time <span class="text-danger">*</span></label>
               <input type="time" name="meeting_time" class="form-control" value="{{ form.meeting_time.value|default:'' }}">
+              {% if form.meeting_time.errors %}<div class="text-danger small">{{ form.meeting_time.errors.0 }}</div>{% endif %}
             </div>
           </div>
         </div>
         <div class="ci-form-section mb-4">
           <h6><i class="fas fa-users me-1"></i>Leadership</h6>
           <div class="mb-3">
-            <label class="form-label">Facilitator Username <span class="text-danger">*</span></label>
-            <input type="text" name="facilitator_username" class="form-control" value="{{ form.facilitator_username.value|default:'' }}" placeholder="Type the facilitator's username">
+            <label class="form-label">Facilitator <span class="text-danger">*</span></label>
+            {{ form.facilitator }}
+            {% if form.facilitator.errors %}<div class="text-danger small mt-1">{{ form.facilitator.errors.0 }}</div>{% endif %}
           </div>
           <div class="mb-3">
-            <label class="form-label">2IC Username <span class="text-muted">(optional)</span></label>
-            <input type="text" name="second_in_cmd_username" class="form-control" value="{{ form.second_in_cmd_username.value|default:'' }}" placeholder="Type the 2IC's username">
+            <label class="form-label">2IC (Second in Command) <span class="text-muted">(optional)</span></label>
+            {{ form.second_in_cmd }}
+            {% if form.second_in_cmd.errors %}<div class="text-danger small mt-1">{{ form.second_in_cmd.errors.0 }}</div>{% endif %}
           </div>
         </div>
-        {% if form.errors %}
+        {% if form.non_field_errors %}
         <div class="alert alert-danger small">
-          {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
+          {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
         </div>
         {% endif %}
         <div class="d-flex gap-2">
-          <button type="submit" class="btn btn-ci px-4">Save Cell</button>
+          <button type="submit" class="btn btn-ci px-4"><i class="fas fa-save me-2"></i>Save Cell</button>
           <a href="{% url 'cell_list' %}" class="btn btn-outline-secondary">Cancel</a>
         </div>
       </form>

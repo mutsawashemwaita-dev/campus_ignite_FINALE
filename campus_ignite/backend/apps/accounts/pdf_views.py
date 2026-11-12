@@ -2,7 +2,7 @@ from io import BytesIO
 from django.contrib.auth.decorators import login_required
 from reportlab.lib.units import cm
 
-from apps.departments.pdf_views import _doc, _styles, _header, _meta, _sec, _footer, _tbl, _resp
+from apps.core.pdf import _doc, _styles, _header, _meta, _sec, _footer, _tbl, _resp
 from .models import CustomUser
 
 

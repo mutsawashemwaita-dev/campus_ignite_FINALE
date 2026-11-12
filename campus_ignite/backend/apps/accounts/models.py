@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 
 
@@ -25,22 +25,53 @@ class Role(models.Model):
         return self.get_name_display()
 
 
-class CustomUser(AbstractUser):
-    role     = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
-    is_alumni = models.BooleanField(default=False)
-    photo    = models.ImageField(upload_to='users/', null=True, blank=True)
-    phone    = models.CharField(max_length=20, blank=True)
-    bio      = models.TextField(blank=True)
-    birthday = models.DateField(null=True, blank=True)
+class CustomUserManager(UserManager):
+    def login_users(self):
+        """Users who have login access and system credentials."""
+        return self.filter(is_member_only=False).exclude(password__startswith='!')
 
-    # Allow users without login credentials (regular members)
-    # username is inherited but we allow blank for non-login members
-    # We override by setting unusable password for member-only records
+    def member_attendees(self):
+        """Congregants/attendees without system login access."""
+        return self.filter(models.Q(is_member_only=True) | models.Q(password__startswith='!'))
+
+
+class CustomUser(AbstractUser):
+    role      = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
+    is_alumni = models.BooleanField(default=False)
+    photo     = models.ImageField(upload_to='users/', null=True, blank=True)
+    phone     = models.CharField(max_length=20, blank=True)
+    bio       = models.TextField(blank=True)
+    birthday  = models.DateField(null=True, blank=True)
+    is_member_only = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="Designates whether this person is an attendee/member without system credentials."
+    )
+
+    objects = CustomUserManager()
 
     def __str__(self):
         name = self.get_full_name().strip() or self.username
         role_label = self.role.get_name_display() if self.role else 'Member'
         return f"{name} ({role_label})"
+
+    def save(self, *args, **kwargs):
+        # Auto-sync is_member_only with unusable password / synthetic member_ usernames
+        if not self.has_usable_password() and (self.username.startswith('member_') or not self.password):
+            self.is_member_only = True
+        super().save(*args, **kwargs)
+
+    def set_as_member_only(self):
+        """Revoke login access and mark as attendee/member."""
+        self.is_member_only = True
+        self.set_unusable_password()
+
+    def set_as_login_user(self, password, username=None):
+        """Grant login credentials and mark as login user."""
+        self.is_member_only = False
+        if username:
+            self.username = username
+        self.set_password(password)
 
     def has_role(self, *role_names):
         return self.role and self.role.name in role_names
@@ -70,9 +101,8 @@ class CustomUser(AbstractUser):
         return self.has_role(Role.ADMIN) or self.is_superuser
 
     @property
-    def is_member_only(self):
-        """True if this person has no login (regular member)."""
-        return not self.has_usable_password()
+    def can_login(self):
+        return not self.is_member_only and self.has_usable_password()
 
     @property
     def birthday_display(self):

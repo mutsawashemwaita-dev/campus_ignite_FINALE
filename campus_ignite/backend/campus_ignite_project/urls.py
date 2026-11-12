@@ -3,14 +3,14 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
-from apps.departments.print_views import (
-    print_cell_reports, print_service, print_services_all,
-    print_notifications, print_department, print_consolidated_report
-)
-from apps.departments.pdf_views import (
-    pdf_cell_reports, pdf_service, pdf_services_all,
-    pdf_notifications, pdf_department, pdf_consolidated_report
-)
+from apps.cells.print_views import print_cell_reports, print_consolidated_report
+from apps.cells.pdf_views import pdf_cell_reports, pdf_consolidated_report
+from apps.services.print_views import print_service, print_services_all
+from apps.services.pdf_views import pdf_service, pdf_services_all
+from apps.notifications.print_views import print_notifications
+from apps.notifications.pdf_views import pdf_notifications
+from apps.departments.print_views import print_department
+from apps.departments.pdf_views import pdf_department
 
 urlpatterns = [
     path('admin/', admin.site.urls),

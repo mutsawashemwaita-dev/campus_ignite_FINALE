@@ -31,10 +31,9 @@
               <input type="number" name="head_count" class="form-control" value="{{ form.head_count.value|default:'' }}" placeholder="Number of people present">
             </div>
             <div class="col-md-6">
-              <label class="form-label">Facilitated By (Username) <span class="text-danger">*</span></label>
-              <input type="text" name="facilitated_by_username" class="form-control"
-                     value="{{ form.facilitated_by_username.value|default:request.user.username }}"
-                     placeholder="Type the username">
+              <label class="form-label">Facilitated By <span class="text-danger">*</span></label>
+              {{ form.facilitated_by }}
+              {% if form.facilitated_by.errors %}<div class="text-danger small mt-1">{{ form.facilitated_by.errors.0 }}</div>{% endif %}
             </div>
           </div>
         </div>
