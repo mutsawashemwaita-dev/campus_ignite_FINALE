@@ -3,48 +3,166 @@
 {% block page_title %}Dashboard{% endblock %}
 {% block content %}
 
-<!-- Stat Row -->
-<div class="row g-3 mb-4">
-  <div class="col-6 col-md-3">
-    <div class="ci-stat">
-      <div class="lbl"><i class="fas fa-people-group me-1"></i> Active Cells</div>
-      <div class="num">{{ total_cells }}</div>
+<!-- Dynamic Live Welcome Card -->
+<div class="ci-welcome-card mb-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+      <div class="ci-live-badge">
+        <span class="ci-pulse-dot"></span>
+        <span id="ciLiveClock">Live Dashboard</span>
+      </div>
+      <h3 class="fw-bold mb-1" style="color:var(--ci-primary);">
+        <span id="ciGreetingTime">Welcome</span>, {{ user.first_name|default:user.username }}
+      </h3>
+      <p class="text-muted small mb-0">Here's a live overview of activities and ministry metrics across Campus Ignite.</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <button type="button" class="btn btn-sm btn-outline-secondary ci-cmd-open-btn d-flex align-items-center gap-2" title="Press Ctrl+K to search">
+        <i class="fas fa-search"></i>
+        <span>Quick Jump</span>
+        <kbd class="ci-kbd">Ctrl K</kbd>
+      </button>
+      <a href="{% url 'org_calendar' %}" class="btn btn-sm btn-ci-gold d-flex align-items-center gap-2">
+        <i class="fas fa-calendar-alt"></i> Calendar
+      </a>
     </div>
   </div>
-  <div class="col-6 col-md-3">
-    <div class="ci-stat">
-      <div class="lbl"><i class="fas fa-bell me-1"></i> Notifications</div>
-      <div class="num">{{ unread_count }}</div>
-    </div>
-  </div>
-  {% if recent_service %}
-  <div class="col-12 col-md-6">
-    <div class="ci-stat" style="border-left-color:var(--ci-primary);">
-      <div class="lbl"><i class="fas fa-church me-1"></i> Last Service</div>
-      <div class="fw-bold" style="color:var(--ci-primary);font-size:1rem;">{{ recent_service.message_title }}</div>
-      <small class="text-muted">{{ recent_service.date }} &bull; Headcount: <strong>{{ recent_service.head_count }}</strong></small>
-    </div>
-  </div>
-  {% endif %}
 </div>
 
-<!-- Birthday Alerts -->
-{% if birthday_alerts %}
-<div class="alert mb-4" style="background:linear-gradient(135deg,#1A3C6E,#C8A951);color:#fff;border:none;border-radius:10px;">
-  <h6 class="fw-bold mb-2"><i class="fas fa-birthday-cake me-2"></i>🎂 Birthday Alerts</h6>
-  {% for b in birthday_alerts %}
-  <div class="mb-1" style="font-size:.9rem;">
-    {% if b.days_away == 0 %}
-      <span class="badge bg-warning text-dark me-1">Today!</span>
-    {% elif b.days_away == 1 %}
-      <span class="badge bg-danger me-1">Tomorrow!</span>
-    {% else %}
-      <span class="badge bg-light text-dark me-1">{{ b.days_away }} days</span>
-    {% endif %}
-    <strong>{{ b.person.get_full_name }}</strong> — {{ b.person.birthday|date:"d M" }}
+<!-- Stat Row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="ci-stat">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="lbl"><i class="fas fa-people-group me-1 text-primary"></i> Active Cells</div>
+          <div class="num ci-counter" data-target="{{ total_cells }}">{{ total_cells }}</div>
+        </div>
+        <div class="ci-stat-icon-wrap bg-primary-subtle text-primary">
+          <i class="fas fa-people-group"></i>
+        </div>
+      </div>
+      <div class="ci-stat-footer mt-2 pt-2 border-top">
+        <a href="{% url 'cell_list' %}" class="text-decoration-none small text-muted d-flex align-items-center justify-content-between">
+          <span>Manage cells</span>
+          <i class="fas fa-arrow-right fa-xs ci-arrow-hover"></i>
+        </a>
+      </div>
+    </div>
   </div>
-  {% endfor %}
-  <a href="{% url 'birthday_list' %}" class="btn btn-sm btn-light mt-2">View All Birthdays</a>
+
+  <div class="col-6 col-lg-3">
+    <div class="ci-stat">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="lbl"><i class="fas fa-users me-1 text-success"></i> Community</div>
+          <div class="num ci-counter" data-target="{{ total_users }}">{{ total_users }}</div>
+        </div>
+        <div class="ci-stat-icon-wrap bg-success-subtle text-success">
+          <i class="fas fa-users"></i>
+        </div>
+      </div>
+      <div class="ci-stat-footer mt-2 pt-2 border-top">
+        <a href="{% url 'leadership_directory' %}" class="text-decoration-none small text-muted d-flex align-items-center justify-content-between">
+          <span>View leadership</span>
+          <i class="fas fa-arrow-right fa-xs ci-arrow-hover"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    <div class="ci-stat">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="lbl"><i class="fas fa-bell me-1 text-warning"></i> Notifications</div>
+          <div class="num ci-counter" data-target="{{ unread_count }}">{{ unread_count }}</div>
+        </div>
+        <div class="ci-stat-icon-wrap bg-warning-subtle text-warning">
+          <i class="fas fa-bell"></i>
+        </div>
+      </div>
+      <div class="ci-stat-footer mt-2 pt-2 border-top">
+        <a href="{% url 'notification_list' %}" class="text-decoration-none small text-muted d-flex align-items-center justify-content-between">
+          <span>View all alerts</span>
+          <i class="fas fa-arrow-right fa-xs ci-arrow-hover"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    {% if recent_service %}
+    <div class="ci-stat ci-stat-highlight">
+      <div class="d-flex justify-content-between align-items-start">
+        <div style="overflow:hidden;">
+          <div class="lbl"><i class="fas fa-church me-1 text-danger"></i> Last Service</div>
+          <div class="fw-bold text-truncate" style="color:var(--ci-primary);font-size:1.02rem;" title="{{ recent_service.message_title }}">{{ recent_service.message_title }}</div>
+          <div class="small text-muted text-truncate mt-1">
+            {{ recent_service.date|date:"M d, Y" }} &bull; Headcount: <strong class="text-dark">{{ recent_service.head_count }}</strong>
+          </div>
+        </div>
+        <div class="ci-stat-icon-wrap bg-danger-subtle text-danger">
+          <i class="fas fa-church"></i>
+        </div>
+      </div>
+      <div class="ci-stat-footer mt-2 pt-2 border-top">
+        <a href="{% url 'service_list' %}" class="text-decoration-none small text-muted d-flex align-items-center justify-content-between">
+          <span>Service history</span>
+          <i class="fas fa-arrow-right fa-xs ci-arrow-hover"></i>
+        </a>
+      </div>
+    </div>
+    {% else %}
+    <div class="ci-stat">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="lbl"><i class="fas fa-church me-1 text-danger"></i> Services</div>
+          <div class="num">0</div>
+        </div>
+        <div class="ci-stat-icon-wrap bg-danger-subtle text-danger">
+          <i class="fas fa-church"></i>
+        </div>
+      </div>
+      <div class="ci-stat-footer mt-2 pt-2 border-top">
+        <a href="{% url 'service_create' %}" class="text-decoration-none small text-muted d-flex align-items-center justify-content-between">
+          <span>Record first service</span>
+          <i class="fas fa-arrow-right fa-xs ci-arrow-hover"></i>
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Birthday Alerts Banner -->
+{% if birthday_alerts %}
+<div class="ci-birthday-banner mb-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <div>
+      <h6 class="fw-bold mb-2 text-white d-flex align-items-center gap-2">
+        <span class="ci-confetti-icon">🎉</span> Upcoming Celebrations
+      </h6>
+      <div class="d-flex flex-wrap gap-2">
+        {% for b in birthday_alerts %}
+        <div class="ci-birthday-pill">
+          {% if b.days_away == 0 %}
+            <span class="badge bg-warning text-dark">Today! 🎂</span>
+          {% elif b.days_away == 1 %}
+            <span class="badge bg-danger">Tomorrow 🎈</span>
+          {% else %}
+            <span class="badge bg-light text-dark">{{ b.days_away }}d away</span>
+          {% endif %}
+          <span class="fw-semibold text-white">{{ b.person.get_full_name }}</span>
+          <span class="ci-birthday-date">({{ b.person.birthday|date:"d M" }})</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <a href="{% url 'birthday_list' %}" class="btn btn-sm btn-light fw-semibold shadow-sm d-inline-flex align-items-center gap-1">
+      <i class="fas fa-gift text-warning"></i> View Birthdays
+    </a>
+  </div>
 </div>
 {% endif %}
 
@@ -56,19 +174,28 @@
     <div class="row g-3 mb-4">
       {% for dept in my_departments %}
       <div class="col-md-6">
-        <div class="ci-card card h-100">
+        <div class="ci-card ci-card-interactive card h-100">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-start mb-2">
-              <h6 class="fw-bold mb-0" style="color:var(--ci-primary);">{{ dept.name }}</h6>
+              <div>
+                <div class="ci-tag-subtle mb-1"><i class="fas fa-layer-group me-1"></i> Department</div>
+                <h6 class="fw-bold mb-0" style="color:var(--ci-primary);">{{ dept.name }}</h6>
+              </div>
               <span class="badge-role">{{ dept.get_dept_type_display }}</span>
             </div>
             <p class="text-muted small mb-3">
-              <i class="fas fa-users me-1"></i>{{ dept.members.count }} member{{ dept.members.count|pluralize }}
+              <i class="fas fa-users me-1 text-primary"></i>{{ dept.members.count }} member{{ dept.members.count|pluralize }}
             </p>
-            <div class="d-flex gap-2">
-              <a href="{% url 'department_detail' dept.pk %}" class="btn btn-sm btn-ci">Manage</a>
-              <a href="{% url 'department_event_create' dept.pk %}" class="btn btn-sm btn-outline-secondary">+ Event</a>
-              <a href="{% url 'dept_create_member' dept.pk %}" class="btn btn-sm btn-outline-secondary">+ New Member</a>
+            <div class="d-flex flex-wrap gap-2">
+              <a href="{% url 'department_detail' dept.pk %}" class="btn btn-sm btn-ci d-inline-flex align-items-center gap-1">
+                <i class="fas fa-arrow-up-right-from-square fa-xs"></i> Manage
+              </a>
+              <a href="{% url 'department_event_create' dept.pk %}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
+                <i class="fas fa-calendar-plus fa-xs"></i> Event
+              </a>
+              <a href="{% url 'dept_create_member' dept.pk %}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
+                <i class="fas fa-user-plus fa-xs"></i> Member
+              </a>
             </div>
           </div>
         </div>
@@ -82,20 +209,29 @@
     <div class="row g-3 mb-4">
       {% for cell in my_cells %}
       <div class="col-md-6">
-        <div class="ci-card card h-100">
+        <div class="ci-card ci-card-interactive card h-100">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-start mb-2">
-              <h6 class="fw-bold mb-0" style="color:var(--ci-primary);">{{ cell.name }}</h6>
+              <div>
+                <div class="ci-tag-subtle mb-1"><i class="fas fa-house-chimney me-1"></i> Cell Fellowship</div>
+                <h6 class="fw-bold mb-0" style="color:var(--ci-primary);">{{ cell.name }}</h6>
+              </div>
               <span class="badge-role">{{ cell.cell_type }}</span>
             </div>
             <p class="text-muted small mb-3">
-              <i class="fas fa-calendar-day me-1"></i>{{ cell.meeting_day }}s
-              <i class="fas fa-clock ms-2 me-1"></i>{{ cell.meeting_time }}
+              <i class="fas fa-calendar-day me-1 text-primary"></i>{{ cell.meeting_day }}s
+              <i class="fas fa-clock ms-2 me-1 text-primary"></i>{{ cell.meeting_time }}
             </p>
-            <div class="d-flex gap-2">
-              <a href="{% url 'cell_detail' cell.pk %}" class="btn btn-sm btn-ci">View Cell</a>
-              <a href="{% url 'meeting_report_create' cell.pk %}" class="btn btn-sm btn-outline-secondary">+ Report</a>
-              <a href="{% url 'cell_event_create' cell.pk %}" class="btn btn-sm btn-outline-secondary">+ Event</a>
+            <div class="d-flex flex-wrap gap-2">
+              <a href="{% url 'cell_detail' cell.pk %}" class="btn btn-sm btn-ci d-inline-flex align-items-center gap-1">
+                <i class="fas fa-eye fa-xs"></i> View
+              </a>
+              <a href="{% url 'meeting_report_create' cell.pk %}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
+                <i class="fas fa-file-circle-plus fa-xs"></i> Report
+              </a>
+              <a href="{% url 'cell_event_create' cell.pk %}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
+                <i class="fas fa-calendar-plus fa-xs"></i> Event
+              </a>
             </div>
           </div>
         </div>
@@ -104,39 +240,50 @@
     </div>
     {% endif %}
 
-    <!-- Quick actions -->
-    <h6 class="ci-section-header"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
-    <div class="row g-3">
-      <div class="col-6 col-md-3">
-        <a href="{% url 'cell_list' %}" class="card border-0 text-decoration-none h-100" style="background:var(--ci-light);border-radius:10px;">
-          <div class="card-body text-center py-3">
-            <i class="fas fa-people-group fa-lg mb-2" style="color:var(--ci-primary);"></i>
-            <div style="font-size:.82rem;font-weight:600;color:var(--ci-primary);">All Cells</div>
+    <!-- Tactile Quick Actions Grid -->
+    <h6 class="ci-section-header d-flex justify-content-between align-items-center">
+      <span><i class="fas fa-bolt me-2 text-warning"></i>Quick Actions</span>
+      <span class="text-muted small fw-normal">Instant access</span>
+    </h6>
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-sm-3">
+        <a href="{% url 'cell_list' %}" class="ci-quick-card text-decoration-none h-100">
+          <div class="ci-quick-icon bg-primary-subtle text-primary">
+            <i class="fas fa-people-group"></i>
           </div>
+          <div class="ci-quick-title">All Cells</div>
+          <div class="ci-quick-desc">Manage & track cells</div>
+          <div class="ci-quick-badge"><i class="fas fa-arrow-right"></i></div>
         </a>
       </div>
-      <div class="col-6 col-md-3">
-        <a href="{% url 'service_create' %}" class="card border-0 text-decoration-none h-100" style="background:var(--ci-light);border-radius:10px;">
-          <div class="card-body text-center py-3">
-            <i class="fas fa-church fa-lg mb-2" style="color:var(--ci-primary);"></i>
-            <div style="font-size:.82rem;font-weight:600;color:var(--ci-primary);">Record Service</div>
+      <div class="col-6 col-sm-3">
+        <a href="{% url 'service_create' %}" class="ci-quick-card text-decoration-none h-100">
+          <div class="ci-quick-icon bg-danger-subtle text-danger">
+            <i class="fas fa-church"></i>
           </div>
+          <div class="ci-quick-title">Record Service</div>
+          <div class="ci-quick-desc">Log Sunday attendance</div>
+          <div class="ci-quick-badge"><i class="fas fa-arrow-right"></i></div>
         </a>
       </div>
-      <div class="col-6 col-md-3">
-        <a href="{% url 'leadership_directory' %}" class="card border-0 text-decoration-none h-100" style="background:var(--ci-light);border-radius:10px;">
-          <div class="card-body text-center py-3">
-            <i class="fas fa-users-cog fa-lg mb-2" style="color:var(--ci-primary);"></i>
-            <div style="font-size:.82rem;font-weight:600;color:var(--ci-primary);">Leadership</div>
+      <div class="col-6 col-sm-3">
+        <a href="{% url 'leadership_directory' %}" class="ci-quick-card text-decoration-none h-100">
+          <div class="ci-quick-icon bg-info-subtle text-info">
+            <i class="fas fa-users-cog"></i>
           </div>
+          <div class="ci-quick-title">Leadership</div>
+          <div class="ci-quick-desc">Pastors & anchors</div>
+          <div class="ci-quick-badge"><i class="fas fa-arrow-right"></i></div>
         </a>
       </div>
-      <div class="col-6 col-md-3">
-        <a href="{% url 'birthday_list' %}" class="card border-0 text-decoration-none h-100" style="background:var(--ci-light);border-radius:10px;">
-          <div class="card-body text-center py-3">
-            <i class="fas fa-birthday-cake fa-lg mb-2" style="color:var(--ci-accent);"></i>
-            <div style="font-size:.82rem;font-weight:600;color:var(--ci-primary);">Birthdays</div>
+      <div class="col-6 col-sm-3">
+        <a href="{% url 'birthday_list' %}" class="ci-quick-card text-decoration-none h-100">
+          <div class="ci-quick-icon bg-warning-subtle text-warning">
+            <i class="fas fa-birthday-cake"></i>
           </div>
+          <div class="ci-quick-title">Birthdays</div>
+          <div class="ci-quick-desc">Celebrations & alerts</div>
+          <div class="ci-quick-badge"><i class="fas fa-arrow-right"></i></div>
         </a>
       </div>
     </div>
@@ -145,16 +292,21 @@
   <!-- Right column -->
   <div class="col-lg-4">
     {% if pending_reports %}
-    <div class="ci-card card mb-3">
-      <div class="card-header"><i class="fas fa-file-alt me-2"></i>Recent Reports</div>
+    <div class="ci-card card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-file-lines me-2 text-primary"></i>Recent Reports</span>
+        {% if user.is_cell_leader or user.is_admin or user.is_pastor %}
+        <a href="{% url 'consolidated_report_list' %}" class="small text-decoration-none">All</a>
+        {% endif %}
+      </div>
       <ul class="list-group list-group-flush">
         {% for r in pending_reports %}
-        <li class="list-group-item d-flex justify-content-between align-items-center py-2" style="font-size:.85rem;">
+        <li class="list-group-item ci-feed-item d-flex justify-content-between align-items-center py-2 px-3">
           <div>
-            <div class="fw-semibold">{{ r.cell.name }}</div>
-            <small class="text-muted">{{ r.date }}</small>
+            <div class="fw-semibold text-truncate" style="max-width:180px;">{{ r.cell.name }}</div>
+            <small class="text-muted"><i class="fas fa-calendar-check me-1"></i>{{ r.date|date:"M d, Y" }}</small>
           </div>
-          <span class="badge-hc">{{ r.head_count }}</span>
+          <span class="badge-hc" title="Headcount">{{ r.head_count }}</span>
         </li>
         {% endfor %}
       </ul>
@@ -162,18 +314,31 @@
     {% endif %}
 
     <div class="ci-card card">
-      <div class="card-header"><i class="fas fa-bell me-2"></i>Recent Alerts</div>
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-bell me-2 text-warning"></i>Recent Alerts</span>
+        <a href="{% url 'notification_list' %}" class="small text-decoration-none">View All</a>
+      </div>
       {% if recent_notifications %}
         <ul class="list-group list-group-flush">
           {% for n in recent_notifications %}
-          <li class="list-group-item notif-item {% if not n.is_read %}unread{% endif %} py-2" style="font-size:.82rem;">
-            <div class="fw-semibold">{{ n.title }}</div>
-            <small class="text-muted">{{ n.created_at|timesince }} ago</small>
+          <li class="list-group-item notif-item ci-feed-item {% if not n.is_read %}unread{% endif %} py-2 px-3">
+            <div class="d-flex align-items-start gap-2">
+              {% if not n.is_read %}
+                <span class="ci-unread-dot mt-1" title="Unread"></span>
+              {% endif %}
+              <div class="flex-grow-1">
+                <div class="fw-semibold">{{ n.title }}</div>
+                <small class="text-muted"><i class="far fa-clock me-1"></i>{{ n.created_at|timesince }} ago</small>
+              </div>
+            </div>
           </li>
           {% endfor %}
         </ul>
       {% else %}
-        <div class="p-3 text-muted small">No recent notifications.</div>
+        <div class="p-4 text-center text-muted small">
+          <i class="fas fa-check-circle text-success mb-2" style="font-size:1.5rem;display:block;"></i>
+          All caught up! No recent alerts.
+        </div>
       {% endif %}
     </div>
   </div>

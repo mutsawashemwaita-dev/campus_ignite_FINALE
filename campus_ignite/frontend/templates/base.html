@@ -135,8 +135,13 @@
   <div class="ci-topbar">
     <h5>{% block page_title %}Dashboard{% endblock %}</h5>
     <div class="d-flex align-items-center gap-3">
+      <button type="button" class="btn btn-sm ci-search-btn d-none d-sm-flex align-items-center gap-2" id="ciCommandTrigger" title="Press Ctrl+K to jump anywhere">
+        <i class="fas fa-search text-muted"></i>
+        <span class="text-muted small">Quick search...</span>
+        <kbd class="ci-kbd">Ctrl K</kbd>
+      </button>
       <a href="{% url 'notification_list' %}" class="btn btn-sm btn-outline-secondary position-relative">
-        <i class="fas fa-bell"></i>
+        <i class="fas fa-bell {% if unread_notifications > 0 %}ci-bell-ring{% endif %}"></i>
         {% if unread_notifications > 0 %}
           <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notif-badge" style="font-size:.6rem;">{{ unread_notifications }}</span>
         {% endif %}
@@ -157,6 +162,32 @@
     {% endfor %}
 
     {% block content %}{% endblock %}
+  </div>
+</div>
+
+<!-- Quick Jump / Command Palette Spotlight Modal -->
+<div class="modal fade" id="ciCommandModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width:560px;">
+    <div class="modal-content ci-spotlight-modal">
+      <div class="modal-header border-0 pb-0">
+        <div class="ci-spotlight-search w-100 position-relative">
+          <i class="fas fa-search ci-spotlight-icon"></i>
+          <input type="text" id="ciCommandInput" class="form-control ci-spotlight-input" placeholder="Type to jump anywhere... (e.g. cells, birthdays, service)" autocomplete="off">
+          <button type="button" class="btn-close ci-spotlight-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="modal-body pt-2" id="ciCommandResults">
+        <!-- Live filtered results injected via JS -->
+      </div>
+      <div class="modal-footer border-top py-2 px-3 d-flex justify-content-between align-items-center">
+        <div class="small text-muted d-flex align-items-center gap-2">
+          <span><kbd class="ci-kbd">↑</kbd> <kbd class="ci-kbd">↓</kbd> navigate</span>
+          <span><kbd class="ci-kbd">Enter</kbd> open</span>
+          <span><kbd class="ci-kbd">Esc</kbd> close</span>
+        </div>
+        <span class="badge bg-light text-muted border">Campus Ignite</span>
+      </div>
+    </div>
   </div>
 </div>
 

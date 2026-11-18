@@ -9,46 +9,90 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="{% static 'css/campus_ignite.css' %}" rel="stylesheet">
+  <style>
+    .ci-sidebar { display:flex; flex-direction:column; height:100vh; position:fixed; top:0; left:0; }
+    .ci-sidebar-nav { flex:1; overflow-y:auto; min-height:0; }
+    .ci-sidebar-bottom { flex-shrink:0; padding:.75rem 1rem 1rem; border-top:1px solid rgba(255,255,255,.12); background:var(--ci-primary); }
+    .ci-logout-btn { display:flex; align-items:center; justify-content:center; gap:.5rem; width:100%; padding:.55rem 1rem; background:rgba(220,53,69,.18); color:#ff8080; border:1px solid rgba(220,53,69,.35); border-radius:8px; font-size:.85rem; font-weight:600; text-decoration:none; transition:all .15s; }
+    .ci-logout-btn:hover { background:rgba(220,53,69,.35); color:#fff; }
+    .ci-user-chip { display:flex; align-items:center; gap:.5rem; margin-bottom:.65rem; }
+    .ci-user-chip .name { color:#fff; font-size:.8rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .ci-user-chip .role { color:rgba(255,255,255,.45); font-size:.7rem; }
+  </style>
   {% block extra_css %}{% endblock %}
 </head>
 <body>
 
 {% if user.is_authenticated %}
 
-<!-- Mobile toggle -->
-<button id="sidebar-toggle" class="btn btn-sm d-md-none position-fixed" style="top:1rem;left:1rem;z-index:300;background:var(--ci-primary);color:#fff;border-radius:8px;">
+<button id="sidebar-toggle" class="btn btn-sm d-md-none position-fixed"
+        style="top:1rem;left:1rem;z-index:300;background:var(--ci-primary);color:#fff;border-radius:8px;">
   <i class="fas fa-bars"></i>
 </button>
 
-<!-- Sidebar -->
-<aside class="ci-sidebar">
-  <div class="brand">
-    <h5><i class="fas fa-fire me-2"></i>Campus Ignite</h5>
-    <small>Campus Christian Institution</small>
+<aside class="ci-sidebar" style="width:240px;background:var(--ci-primary);">
+
+  <div style="padding:1.4rem 1.2rem 1rem;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;">
+    <h5 style="color:var(--ci-accent);font-weight:700;margin:0;font-size:1.05rem;">
+      <img src="{% static 'img/logo.png.jpeg' %}" style="width:28px;height:28px;object-fit:contain;border-radius:50%;margin-right:6px;">Campus Ignite
+    </h5>
+    <small style="color:rgba(255,255,255,.45);font-size:.7rem;">Campus Christian Institution</small>
   </div>
 
-  <nav class="mt-2 flex-grow-1">
+  <nav class="ci-sidebar-nav" style="padding-top:.5rem;">
     <div class="nav-section">Main</div>
     <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
       <i class="fas fa-th-large"></i> Dashboard
     </a>
 
-    <div class="nav-section">Ministry</div>
+    <div class="nav-section">People</div>
+    {% if user.is_admin or user.is_pastor %}
+    <a href="{% url 'user_list' %}" class="nav-link {% if 'users' in request.path %}active{% endif %}">
+      <i class="fas fa-users"></i> Manage People
+    </a>
+    {% endif %}
     <a href="{% url 'pastor_list' %}" class="nav-link {% if 'pastors' in request.path %}active{% endif %}">
       <i class="fas fa-cross"></i> Pastoral Team
     </a>
-    <a href="{% url 'leadership_directory' %}" class="nav-link {% if 'leadership' in request.path %}active{% endif %}">
+    <a href="{% url 'leadership_directory' %}" class="nav-link {% if request.path == '/leadership/' or 'assign' in request.path %}active{% endif %}">
       <i class="fas fa-users-cog"></i> Leadership
+    </a>
+    <a href="{% url 'student_anchor_list' %}" class="nav-link {% if 'anchors' in request.path %}active{% endif %}">
+      <i class="fas fa-anchor"></i> Student Anchors
+    </a>
+    <a href="{% url 'alumni_list' %}" class="nav-link {% if 'alumni' in request.path %}active{% endif %}">
+      <i class="fas fa-user-graduate"></i> Alumni
+    </a>
+
+    <div class="nav-section">Ministry</div>
+    <a href="{% url 'org_calendar' %}" class="nav-link {% if 'calendar' in request.path %}active{% endif %}">
+      <i class="fas fa-calendar-days"></i> Calendar
+    </a>
+
+    <a href="{% url 'evangelism_home' %}" class="nav-link {% if 'evangelism' in request.path %}active{% endif %}">
+      <i class="fas fa-fire"></i> Evangelism
     </a>
     <a href="{% url 'cell_list' %}" class="nav-link {% if 'cells' in request.path %}active{% endif %}">
       <i class="fas fa-people-group"></i> Cells
     </a>
+    <a href="{% url 'department_list' %}" class="nav-link {% if 'departments' in request.path %}active{% endif %}">
+      <i class="fas fa-layer-group"></i> Departments
+    </a>
+    <a href="{% url 'birthday_list' %}" class="nav-link {% if 'birthdays' in request.path %}active{% endif %}">
+      <i class="fas fa-birthday-cake"></i> Birthdays
+    </a>
     <a href="{% url 'service_list' %}" class="nav-link {% if 'services' in request.path %}active{% endif %}">
       <i class="fas fa-church"></i> Services
+    </a>
+    <a href="{% url 'newbie_list' %}" class="nav-link {% if 'newbies' in request.path %}active{% endif %}">
+      <i class="fas fa-user-graduate"></i> Newbies
     </a>
 
     {% if user.is_cell_leader or user.is_admin or user.is_pastor %}
     <div class="nav-section">Reports</div>
+    <a href="{% url 'consolidated_report_list' %}" class="nav-link {% if 'consolidated/all' in request.path %}active{% endif %}">
+      <i class="fas fa-inbox"></i> Reports Inbox
+    </a>
     <a href="{% url 'consolidated_report' %}" class="nav-link">
       <i class="fas fa-file-export"></i> Send Report
     </a>
@@ -64,37 +108,40 @@
     <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
       <i class="fas fa-user-circle"></i> My Profile
     </a>
-
-    <hr class="nav-divider">
-    <a href="{% url 'logout' %}" class="nav-link" style="color:rgba(255,100,100,.8);">
-      <i class="fas fa-sign-out-alt"></i> Logout
-    </a>
   </nav>
 
-  <div class="px-3 pb-3">
-    <div class="d-flex align-items-center gap-2 mt-2">
-      <div class="avatar" style="width:34px;height:34px;font-size:.8rem;">
+  <div class="ci-sidebar-bottom">
+    <div class="ci-user-chip">
+      <div class="avatar" style="width:32px;height:32px;font-size:.78rem;flex-shrink:0;">
         {% if user.photo %}
-          <img src="{{ user.photo.url }}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">
+          <img src="{{ user.photo.url }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
         {% else %}
           {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
         {% endif %}
       </div>
-      <div>
-        <div style="color:#fff;font-size:.8rem;font-weight:600;">{{ user.get_full_name|default:user.username }}</div>
-        <div style="color:rgba(255,255,255,.45);font-size:.7rem;">{{ user.role }}</div>
+      <div style="overflow:hidden;">
+        <div class="name">{{ user.get_full_name|default:user.username }}</div>
+        <div class="role">{{ user.role }}</div>
       </div>
     </div>
+    <a href="{% url 'logout' %}" class="ci-logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
   </div>
+
 </aside>
 
-<!-- Main content -->
 <div class="ci-main">
   <div class="ci-topbar">
     <h5>{% block page_title %}Dashboard{% endblock %}</h5>
     <div class="d-flex align-items-center gap-3">
+      <button type="button" class="btn btn-sm ci-search-btn d-none d-sm-flex align-items-center gap-2" id="ciCommandTrigger" title="Press Ctrl+K to jump anywhere">
+        <i class="fas fa-search text-muted"></i>
+        <span class="text-muted small">Quick search...</span>
+        <kbd class="ci-kbd">Ctrl K</kbd>
+      </button>
       <a href="{% url 'notification_list' %}" class="btn btn-sm btn-outline-secondary position-relative">
-        <i class="fas fa-bell"></i>
+        <i class="fas fa-bell {% if unread_notifications > 0 %}ci-bell-ring{% endif %}"></i>
         {% if unread_notifications > 0 %}
           <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notif-badge" style="font-size:.6rem;">{{ unread_notifications }}</span>
         {% endif %}
@@ -115,6 +162,32 @@
     {% endfor %}
 
     {% block content %}{% endblock %}
+  </div>
+</div>
+
+<!-- Quick Jump / Command Palette Spotlight Modal -->
+<div class="modal fade" id="ciCommandModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width:560px;">
+    <div class="modal-content ci-spotlight-modal">
+      <div class="modal-header border-0 pb-0">
+        <div class="ci-spotlight-search w-100 position-relative">
+          <i class="fas fa-search ci-spotlight-icon"></i>
+          <input type="text" id="ciCommandInput" class="form-control ci-spotlight-input" placeholder="Type to jump anywhere... (e.g. cells, birthdays, service)" autocomplete="off">
+          <button type="button" class="btn-close ci-spotlight-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="modal-body pt-2" id="ciCommandResults">
+        <!-- Live filtered results injected via JS -->
+      </div>
+      <div class="modal-footer border-top py-2 px-3 d-flex justify-content-between align-items-center">
+        <div class="small text-muted d-flex align-items-center gap-2">
+          <span><kbd class="ci-kbd">↑</kbd> <kbd class="ci-kbd">↓</kbd> navigate</span>
+          <span><kbd class="ci-kbd">Enter</kbd> open</span>
+          <span><kbd class="ci-kbd">Esc</kbd> close</span>
+        </div>
+        <span class="badge bg-light text-muted border">Campus Ignite</span>
+      </div>
+    </div>
   </div>
 </div>
 
