@@ -6,6 +6,17 @@ from django.contrib import messages
 from .forms import CustomLoginForm, ProfileUpdateForm
 
 
+def csrf_failure(request, reason=""):
+    from django.conf import settings
+    response = redirect(f"{settings.LOGIN_URL}?session_expired=1")
+    response.delete_cookie(
+        getattr(settings, 'CSRF_COOKIE_NAME', 'csrftoken'),
+        domain=getattr(settings, 'CSRF_COOKIE_DOMAIN', None),
+        path=getattr(settings, 'CSRF_COOKIE_PATH', '/')
+    )
+    return response
+
+
 class CustomLoginView(LoginView):
     form_class = CustomLoginForm
     template_name = 'auth/login.html'

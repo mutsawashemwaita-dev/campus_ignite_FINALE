@@ -1,5 +1,7 @@
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_protect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import ProtectedError, Q
@@ -7,6 +9,23 @@ from .forms import CustomLoginForm, SignupForm, AddPersonForm, EditPersonForm, P
 from .models import CustomUser, Role
 from .decorators import role_required
 import datetime
+
+
+def csrf_failure(request, reason=""):
+    """
+    Gracefully handles CSRF verification failures (e.g. stale tab, expired token,
+    or Safari bfcache token mismatch). Clears the stale CSRF cookie and redirects
+    to the login page with a helpful message, preventing users from ever getting
+    trapped on a 403 Forbidden screen.
+    """
+    from django.conf import settings
+    response = redirect(f"{settings.LOGIN_URL}?session_expired=1")
+    response.delete_cookie(
+        getattr(settings, 'CSRF_COOKIE_NAME', 'csrftoken'),
+        domain=getattr(settings, 'CSRF_COOKIE_DOMAIN', None),
+        path=getattr(settings, 'CSRF_COOKIE_PATH', '/')
+    )
+    return response
 
 
 def _get_upcoming_birthdays():
@@ -27,9 +46,13 @@ def _get_upcoming_birthdays():
     return alerts
 
 
+@never_cache
+@csrf_protect
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
+    if request.GET.get('session_expired'):
+        messages.warning(request, 'Your session was refreshed. Please enter your credentials to sign in.')
     if request.method == 'POST':
         form = CustomLoginForm(request.POST)
         if form.is_valid():
@@ -41,6 +64,8 @@ def login_view(request):
     return render(request, 'auth/login.html', {'form': form})
 
 
+@never_cache
+@csrf_protect
 def signup_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
@@ -211,6 +236,7 @@ def profile(request):
     return render(request, 'auth/profile.html', {'form': form})
 
 
+@never_cache
 def logout_view(request):
     logout(request)
     return redirect('login')

@@ -16,7 +16,43 @@ FRONTEND_DIR = BASE_DIR.parent / 'frontend'
 SECRET_KEY = config('SECRET_KEY', default='campus-ignite-secret-key-change-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://campus-ignite-finale.onrender.com']
+
+# ── Reverse Proxy & SSL Configuration (Render) ───────────────
+# Trust the X-Forwarded-Proto header set by Render's load balancer
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# ── CSRF & Trusted Origins ────────────────────────────────────
+CSRF_TRUSTED_ORIGINS = [
+    'https://campus-ignite-finale.onrender.com',
+    'https://*.onrender.com',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+_env_csrf = config('CSRF_TRUSTED_ORIGINS', default='')
+if _env_csrf:
+    for _origin in _env_csrf.split(','):
+        _origin = _origin.strip()
+        if _origin and _origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(_origin)
+
+# ── Cookie Security & SameSite Policies ───────────────────────
+DATABASE_URL = os.environ.get('DATABASE_URL')
+IS_PRODUCTION = bool(DATABASE_URL) or not DEBUG
+
+if IS_PRODUCTION:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+else:
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# ── Custom CSRF Failure View ──────────────────────────────────
+# Prevents raw 403 Forbidden screens; redirects desynced users back to login
+CSRF_FAILURE_VIEW = 'apps.accounts.views.csrf_failure'
 
 INSTALLED_APPS = [
     'django.contrib.admin',

@@ -52,8 +52,17 @@
         <p class="text-muted small mb-0">Sign in to access your dashboard and ministries</p>
       </div>
 
-      <form method="post" autocomplete="on">
+      <form method="post" autocomplete="on" id="loginForm">
         {% csrf_token %}
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} py-2 small rounded-3 mb-3 d-flex align-items-center">
+              <i class="fas fa-info-circle me-2"></i>
+              <div>{{ message }}</div>
+            </div>
+          {% endfor %}
+        {% endif %}
 
         {% if form.non_field_errors %}
           <div class="alert alert-danger py-2 small rounded-3 mb-3 d-flex align-items-center">
@@ -388,6 +397,30 @@
 
     tiltLoop();
   })();
+
+  // ── Mobile Back-Forward Cache (bfcache) & CSRF Resilience ───
+  // If the page is restored from Safari/Chrome bfcache, reload to fetch a fresh CSRF token
+  window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+      window.location.reload();
+    }
+  });
+
+  // ── Prevent Duplicate Form Submissions (Mobile Double-Tap) ──
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.addEventListener('submit', function (e) {
+      const btn = this.querySelector('button[type="submit"]');
+      if (btn) {
+        if (btn.disabled) {
+          e.preventDefault();
+          return;
+        }
+        btn.disabled = true;
+        btn.innerHTML = '<span>Signing In...</span> <div class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></div>';
+      }
+    });
+  }
 </script>
 </body>
 </html>

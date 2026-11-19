@@ -50,6 +50,15 @@
         <p class="text-muted small mb-0">Register as a leader to manage your ministry department</p>
       </div>
 
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} py-2 small rounded-3 mb-3 d-flex align-items-center">
+            <i class="fas fa-info-circle me-2"></i>
+            <div>{{ message }}</div>
+          </div>
+        {% endfor %}
+      {% endif %}
+
       {% if form.non_field_errors %}
         <div class="alert alert-danger py-2 small rounded-3 mb-3 d-flex align-items-center">
           <i class="fas fa-exclamation-triangle me-2 text-danger"></i>
@@ -57,7 +66,7 @@
         </div>
       {% endif %}
 
-      <form method="post">
+      <form method="post" id="signupForm">
         {% csrf_token %}
         <div class="row g-2 mb-2">
           <div class="col-6">
@@ -319,6 +328,29 @@
     initParticles();
     animate();
   })();
+
+  // ── Mobile Back-Forward Cache (bfcache) & CSRF Resilience ───
+  window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+      window.location.reload();
+    }
+  });
+
+  // ── Prevent Duplicate Form Submissions ───────────────────────
+  const signupForm = document.getElementById('signupForm');
+  if (signupForm) {
+    signupForm.addEventListener('submit', function (e) {
+      const btn = this.querySelector('button[type="submit"]');
+      if (btn) {
+        if (btn.disabled) {
+          e.preventDefault();
+          return;
+        }
+        btn.disabled = true;
+        btn.innerHTML = '<span>Creating Account...</span> <div class="spinner-border spinner-border-sm ms-2" role="status"></div>';
+      }
+    });
+  }
 </script>
 </body>
 </html>
